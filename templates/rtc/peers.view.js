@@ -33,17 +33,18 @@ export function renderPeers() {
     const pick = document.createElement("button");
     pick.className = "btn btn-sm btn-outline-primary";
     pick.textContent = "Target";
-    pick.addEventListener("click", () => {
-      store.setTarget(p);
-      renderTarget();
-      document.querySelector("#ws-target-id").textContent = store.getTarget();
+    pick.addEventListener("click", (event) => {
+      // store.setTarget(p);
+      // renderTarget();
+      document.querySelector("#ws-target-id").textContent = `wait ${p} ?`;
+      sendRequest(event, p);
     });
     li.appendChild(pick);
     peersListEl.appendChild(li);
   }
 }
 
-function renderTarget() {
+export function renderTarget() {
   if (!targetEl) return;
   targetEl.textContent = store.getTarget() ?? "none";
 }

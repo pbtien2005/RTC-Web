@@ -2,7 +2,9 @@ import { store } from "./store.js";
 import { appendIncoming } from "./messages.view.js";
 import { upsertPeerAndRender } from "./peers.view.js"; // thêm dòng này
 import { renderPeers } from "./peers.view.js";
-
+import { showIncomingRequest } from "./request.view.js";
+import { renderTarget } from "./peers.view.js";
+import { sendWS } from "./socket.js";
 export function handleIncoming(rawString) {
   let obj;
   try {
@@ -28,13 +30,49 @@ export function handleIncoming(rawString) {
   if (obj.type === "leave" && obj.id) {
     // nếu có hàm removePeer thì gọi ở đây
     console.log("User left:", obj.id);
-    console.log(store.listPeers());
     store.deletePeer(obj.id);
-    console.log(store.listPeers());
     renderPeers();
     return;
   }
 
   // 🧩 4. Nếu là message chat thường
-  appendIncoming(rawString, store.getClientId());
+  if (obj.type == "message.receive") {
+    appendIncoming(rawString, store.getClientId());
+  }
+  if (obj.type == "request.receive") {
+    appendIncoming(rawString, store.getClientId());
+    showIncomingRequest(
+      store.getClientId(),
+      obj.id,
+      // Accept
+      () => {
+        store.setTarget(obj.id);
+        renderTarget();
+        document.querySelector("#ws-target-id").textContent = store.getTarget();
+        sendWS({
+          type: "request.send.accept",
+          from: store.getClientId(),
+          to: obj.id,
+        });
+      },
+
+      // Reject
+      () =>
+        sendWS({
+          type: "request.send.reject",
+          from: store.getClientId(),
+          to: obj.id,
+        })
+    );
+  }
+  if (obj.type == "request.receive.accept") {
+    appendIncoming(rawString, store.getClientId());
+    store.setTarget(obj.id);
+    renderTarget();
+    document.querySelector("#ws-target-id").textContent = store.getTarget();
+  }
+  if (obj.type == "request.receive.reject") {
+    appendIncoming(rawString, store.getClientId());
+    document.querySelector("#ws-target-id").textContent = "";
+  }
 }

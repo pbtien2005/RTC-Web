@@ -18,8 +18,23 @@ connectWS(wsUrl, handleIncoming);
 window.sendMessage = function (event) {
   const input = document.getElementById("messageText");
   const target = store.getTarget();
-  const msg = { id: client_id, to: target, data: input.value };
+  const msg = {
+    type: "message.send",
+    id: client_id,
+    to: target,
+    data: input.value,
+  };
   sendWS(msg);
   input.value = "";
   event.preventDefault();
+};
+window.sendRequest = function (event, tar) {
+  const reqMsg = `User ${client_id} is requesting to connect with you.`;
+  const msg = {
+    type: "friend.request",
+    id: client_id,
+    to: tar,
+    data: reqMsg,
+  };
+  sendWS(msg);
 };

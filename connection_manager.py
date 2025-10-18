@@ -26,7 +26,7 @@ class ConnectionManager:
     
     async def send_personal_message(self, client_id: str, message: str, websocket: WebSocket):
         """Gửi lại cho chính client (echo)"""
-        payload = {"id": client_id, "data": message}
+        payload = {"type": "message.receive","id": client_id, "data": message}
         await websocket.send_text(json.dumps(payload))
 
 
@@ -40,9 +40,9 @@ class ConnectionManager:
                 continue  # tránh crash nếu WS đã đóng
 
 
-    async def send_1_to_1(self, sender_id: str, target_id: str, message: str):
+    async def send_1_to_1(self, sender_id: str, target_id: str, message: str,type: str):
         """Gửi riêng 1-1"""
         ws = self.active_connections.get(target_id)
         if ws:
-            payload = {"id": sender_id, "data": message}
+            payload = {"type":type,"id": sender_id, "data": message}
             await ws.send_text(json.dumps(payload))
