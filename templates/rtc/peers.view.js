@@ -34,8 +34,6 @@ export function renderPeers() {
     pick.className = "btn btn-sm btn-outline-primary";
     pick.textContent = "Target";
     pick.addEventListener("click", (event) => {
-      // store.setTarget(p);
-      // renderTarget();
       document.querySelector("#ws-target-id").textContent = `wait ${p} ?`;
       sendRequest(event, p);
     });

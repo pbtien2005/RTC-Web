@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 import json
 from fastapi.staticfiles import StaticFiles
 from connection_manager import ConnectionManager
+
 app=FastAPI(debug=True)
 
 templates = Jinja2Templates(directory="templates")
@@ -39,6 +40,14 @@ async def websocket_endpoint(websocket: WebSocket,client_id: str):
                 await manager.send_1_to_1(client_id,to_id,f"User {client_id} accepted your connection request","request.receive.accept")
             elif payload.get("type")=="request.send.reject":
                 await manager.send_1_to_1(client_id,to_id,f"You're rejected by {client_id}","request.receive.reject")
+            elif payload.get("type")=="call.request":
+                await manager.send_1_to_1(client_id,to_id,f"You're called by {client_id}","call.request")
+            elif payload.get("type")=="call.accept":
+                await manager.send_1_to_1(client_id,to_id,f"user {client_id} accepted your call","call.accept")
+            elif payload.get("type")=="call.ice":
+                await manager.send_1_to_1(client_id,to_id,payload.get("data"),"call.ice")
+            elif payload.get("type")=="call.offer":
+                await manager.send_1_to_1(client_id,to_id,payload.get("data"),"call.offer")
     
     except WebSocketDisconnect:
         await manager.disconnect(client_id)

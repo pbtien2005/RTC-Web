@@ -15,6 +15,24 @@
       <h1>FastAPI WebSocket Chat</h1>
       <h2>Your ID: <span id="ws-id"></span></h2>
       <h2>Other ID:</h2>
+      <div id="video-container"></div>
+      <!-- <div id="incomingModal" class="modal" style="display: none">
+        <div
+          class="modal-content"
+          style="
+            padding: 16px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background: #fff;
+          "
+        >
+          <h3>📞 Incoming call</h3>
+          <p id="incoming-from">From: Unknown</p>
+          <button id="btn-accept">✅ Accept</button>
+          <button id="btn-reject">❌ Reject</button>
+        </div>
+      </div> -->
       <div class="row g-3 align-items-start mt-2">
         <div class="col-md-6">
           <div class="card">
@@ -32,6 +50,16 @@
               type="button"
             >
               Clear
+            </button>
+            <button
+              id="call-to-targets"
+              type="button"
+              class="btn btn-sm btn-outline-secondary ms-2"
+              type="button"
+              aria-label="Call"
+              onclick="sendCall(event)"
+            >
+              📞 Call
             </button>
           </div>
         </div>
