@@ -48,6 +48,9 @@ async def websocket_endpoint(websocket: WebSocket,client_id: str):
                 await manager.send_1_to_1(client_id,to_id,payload.get("data"),"call.ice")
             elif payload.get("type")=="call.offer":
                 await manager.send_1_to_1(client_id,to_id,payload.get("data"),"call.offer")
+            elif payload.get("type")=="call.answer":
+                await manager.send_1_to_1(client_id,to_id,payload.get("data"),"call.answer")
+
     
     except WebSocketDisconnect:
         await manager.disconnect(client_id)
