@@ -14,6 +14,7 @@ import {
 } from "./peerConnection.js";
 import { startCall } from "./call.controller.js";
 import { tryParseJSON } from "./utils.js";
+import { closePeer } from "./peerConnection.js";
 
 export async function handleIncoming(rawString) {
   let obj;
@@ -129,5 +130,10 @@ export async function handleIncoming(rawString) {
   if (obj.type == "call.ice") {
     console.log(obj.data);
     await addIce(obj.data);
+  }
+  if (obj.type == "call.end") {
+    appendIncoming("the call ended!");
+    closePeer();
+    CallView.setCallState("ended");
   }
 }

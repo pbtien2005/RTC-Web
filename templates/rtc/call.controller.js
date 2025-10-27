@@ -15,7 +15,6 @@ import {
 } from "./call.view.js";
 import { sendWS } from "./socket.js";
 
-let callState = "idle";
 let currentTarget = null;
 
 export async function startCall(isCaller) {
@@ -47,7 +46,6 @@ export async function startCall(isCaller) {
     // 4️⃣ Tạo offer và gửi sang peer bên kia
     if (isCaller) {
       const offer = await makeOffer();
-      callState = "connecting";
       setCallState("connecting");
 
       sendWS({
@@ -59,7 +57,6 @@ export async function startCall(isCaller) {
     }
   } catch (err) {
     console.error("startCall error:", err);
-    callState = "ended";
     setCallState("ended");
   }
 }

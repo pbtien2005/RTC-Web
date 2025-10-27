@@ -4,13 +4,14 @@ import { handleIncoming } from "./dispatcher.js";
 import { mountPeers } from "./peers.view.js";
 import * as CallView from "./call.view.js";
 import { startCall } from "./call.controller.js";
-import { endCall } from "./call.view.js";
 import {
   applyOfferAndMakeAnswer,
+  closePeer,
   toggleCam,
   toggleMic,
 } from "./peerConnection.js";
 import { appendIncoming } from "./messages.view.js";
+import { setCallState } from "./call.view.js";
 
 const client_id = Date.now();
 store.setClientId(client_id);
@@ -21,12 +22,26 @@ mountPeers({
   targetSelector: "#target-id",
   clearBtnSelector: "#clear-target",
 });
-const wsUrl = `ws://192.168.101.186:8000/ws/${client_id}`;
+const wsScheme = location.protocol === "https:" ? "wss" : "ws";
+const wsUrl = `${wsScheme}://${location.host}/ws/${client_id}`;
 connectWS(wsUrl, handleIncoming);
 
-CallView.on("end", endCall);
-CallView.on("toggle-mic", toggleMic);
-CallView.on("toggle-cam", toggleCam);
+CallView.on("end", () => {
+  closePeer();
+  console.log("bấm vào exit");
+  setCallState("ended");
+  sendWS({
+    type: "call.end",
+    from: store.getClientId(),
+    to: store.getTarget(),
+  });
+});
+CallView.on("toggle-mic", (enabled) => {
+  toggleMic(enabled);
+});
+CallView.on("toggle-cam", (enabled) => {
+  toggleCam(enabled);
+});
 CallView.on("share-screen", () => {});
 
 // Giữ nguyên API global để form onsubmit gọi được

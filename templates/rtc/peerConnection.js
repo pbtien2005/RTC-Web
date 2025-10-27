@@ -1,4 +1,4 @@
-import { endCall } from "./call.view.js";
+import { setCallState } from "./call.view.js";
 
 let pc;
 let localSTream;
@@ -7,7 +7,6 @@ let onIceCandidateHandler = null;
 let onRemoteTrackHandler = null;
 
 export async function getLocalStream() {
-  if (localSTream) return localSTream;
   localSTream = await navigator.mediaDevices.getUserMedia({
     video: true,
     audio: true,
@@ -32,18 +31,20 @@ export function createPeer() {
     onRemoteTrackHandler(remoteStream);
   };
   pc.onconnectionstatechange = (event) => {
+    console.log("làldsfasd");
     const state = pc.connectionState;
     console.log("[Peer] connectionState:", pc.connectionState);
     switch (state) {
       case "connected":
+        setCallState("connected");
         break;
       case "disconnected":
+        setCallSate("ended");
         break;
       case "failed":
-        endCall();
+        setCallState("ended");
         break;
       case "closed":
-        endCall();
         break;
     }
   };
@@ -113,20 +114,19 @@ export async function addIce(candidate) {
 }
 
 export function closePeer() {
+  console.log("da chay pc.close();");
   pc.close();
+  console.log("pc.state:", pc.connectionState);
+  console.log("signaling:", pc.signalingState);
   pc.getSenders().forEach((sender) => sender.track?.stop());
 }
-export function toggleMic(enable) {
-  if (localStream) {
-    localStream.getAudioTracks().forEach((track) => {
-      track.enabled = enabled;
-    });
-  }
+export function toggleMic(enabled) {
+  localSTream.getAudioTracks().forEach((track) => {
+    track.enabled = enabled;
+  });
 }
-export function toggleCam(enable) {
-  if (localStream) {
-    localStream.getVideoTracks().forEach((track) => {
-      track.enabled = enabled;
-    });
-  }
+export function toggleCam(enabled) {
+  localSTream.getVideoTracks().forEach((track) => {
+    track.enabled = enabled;
+  });
 }

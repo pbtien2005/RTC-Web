@@ -8,6 +8,7 @@ export function appendIncoming(rawString) {
   // Bản gốc dùng event.data.data → ở đây parse 1 lần cho an toàn
   const obj = tryParseJSON(rawString);
   if (obj == null) {
+    console.log("alo");
     li.textContent = rawString;
   } else {
     const contentText = obj?.data;

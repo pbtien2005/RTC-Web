@@ -1,5 +1,6 @@
 import { store } from "./store.js";
 import { closePeer } from "./peerConnection.js";
+import { sendWS } from "./socket.js";
 
 let root = null;
 let state = "idle"; // idle|calling|ringing|connecting|connected|ended
@@ -34,7 +35,10 @@ export function mount(containerSelector = "#video-container") {
 
       <!-- Video area -->
       <div class="cv-video" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <video id="cv-remote" autoplay playsinline style="width:100%;background:#000;border-radius:12px; transform: scaleX(-1)"></video>
+          <video id="cv-remote" autoplay playsinline style="width:100%;background:#000;border-radius:12px; transform: scaleX(-1)">    <div style="position:absolute;bottom:8px;left:8px;padding:2px 6px;background:rgba(0,0,0,.5);color:#fff;border-radius:6px;font-size:12px">
+            You
+          </div></video>
+      
         <div style="position:relative">
           <video id="cv-local" autoplay playsinline muted
                  style="width:100%;background:#000;border-radius:12px;opacity:.95; transform: scaleX(-1)"></video>
@@ -62,8 +66,6 @@ export function mount(containerSelector = "#video-container") {
     </div>
   `;
   root = host.querySelector("#cv-root");
-  document.querySelector("#cv-btn-cam")?.classList.add("active");
-  document.querySelector("#cv-btn-mic")?.classList.add("active");
   bindButtons();
   //   document.querySelector("#cv-peer-name").textContent = `${store.getTarget()}`;
   setCallState(state);
@@ -80,11 +82,11 @@ function bindButtons() {
   });
   root.querySelector("#cv-btn-mic")?.addEventListener("click", (e) => {
     e.currentTarget.classList.toggle("active");
-    emit("toggle-mic", e.currentTarget.classList.contains("active"));
+    emit("toggle-mic", !e.currentTarget.classList.contains("active"));
   });
   root.querySelector("#cv-btn-cam")?.addEventListener("click", (e) => {
     e.currentTarget.classList.toggle("active");
-    emit("toggle-cam", e.currentTarget.classList.contains("active"));
+    emit("toggle-cam", !e.currentTarget.classList.contains("active"));
   });
   root
     .querySelector("#cv-btn-share")
@@ -99,6 +101,9 @@ export function setCallState(next) {
   show("#cv-state-connecting", next === "connecting");
   show("#cv-state-connected", next === "connected");
   show("#cv-state-ended", next === "ended");
+  if (next == "ended") {
+    host.innerHTML = "";
+  }
   // enable End khi đang nối/đã nối
   const endBtn = root.querySelector("#cv-btn-end");
   if (endBtn)
@@ -117,9 +122,4 @@ export function bindLocalStream(stream) {
 export function bindRemoteStream(stream) {
   const v = root.querySelector("#cv-remote");
   if (v) v.srcObject = stream || null;
-}
-export function endCall() {
-  setCallState("ending");
-  closePeer();
-  host.innerHTML = "";
 }

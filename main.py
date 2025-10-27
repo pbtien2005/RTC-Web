@@ -23,15 +23,15 @@ async def websocket_endpoint(websocket: WebSocket,client_id: str):
     try:
         while True:
             data=await websocket.receive_text()
-            await manager.send_personal_message(client_id,f"you wrote: {data}",websocket)
             try:
                 payload = json.loads(data)
             except json.JSONDecodeError:
                 payload = {"data": data}
+            if(payload.get("data")!="" and payload.get("type" not in ["call.ice","call.offer","call.answer"])): await manager.send_personal_message(client_id,f"you: {payload.get("data")}",websocket)
             to_id=payload.get("to")   
             if payload.get("type")=="message.send":
                 if to_id is not None:
-                    await manager.send_1_to_1(client_id,str(to_id),data,"message.receive")
+                    await manager.send_1_to_1(client_id,str(to_id),payload.get("data"),"message.receive")
                 else: 
                     await manager.send_personal_message(client_id,"Please pick one target!",websocket)
             elif payload.get("type")=="friend.request":
@@ -50,6 +50,8 @@ async def websocket_endpoint(websocket: WebSocket,client_id: str):
                 await manager.send_1_to_1(client_id,to_id,payload.get("data"),"call.offer")
             elif payload.get("type")=="call.answer":
                 await manager.send_1_to_1(client_id,to_id,payload.get("data"),"call.answer")
+            elif payload.get("type")=="call.end":
+                await manager.send_1_to_1(client_id,to_id,f"user {client_id} left the call!","call.end")
 
     
     except WebSocketDisconnect:
