@@ -4,8 +4,6 @@ import { store } from "./store.js";
 export function appendIncoming(rawString) {
   const messages = document.getElementById("messages");
   const li = document.createElement("li");
-
-  // Bản gốc dùng event.data.data → ở đây parse 1 lần cho an toàn
   const obj = tryParseJSON(rawString);
   if (obj == null) {
     console.log("alo");
@@ -14,8 +12,7 @@ export function appendIncoming(rawString) {
     const contentText = obj?.data;
     const isOwn = String(obj.id) === String(store.getClientId());
     li.textContent = obj.data ?? "";
-    if (isOwn) li.style.opacity = "0.7"; // tuỳ bạn style khác
+    if (isOwn) li.style.opacity = "0.7";
   }
-
   messages.appendChild(li);
 }

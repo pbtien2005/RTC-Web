@@ -60,3 +60,19 @@ export async function startCall(isCaller) {
     setCallState("ended");
   }
 }
+
+export async function onDeviceChanged() {
+  console.log("📸 Thiết bị thay đổi → thử cập nhật lại stream");
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const hasCamera = devices.some((d) => d.kind === "videoinput");
+    const hasMic = devices.some((d) => d.kind === "audioinput");
+    if (hasCamera || hasMic) {
+      // Gọi lại logic cập nhật localStream
+      getLocalStream();
+      attachLocalTracks();
+    }
+  } catch (err) {
+    console.error("Device change handler error:", err);
+  }
+}

@@ -37,12 +37,19 @@ export async function handleIncoming(rawString) {
     // nếu có hàm removePeer thì gọi ở đây
     console.log("User left:", obj.id);
     store.deletePeer(obj.id);
+    store.clearTarget();
+    document.querySelector("#ws-target-id").textContent = "";
     renderPeers();
     return;
+  }
+  if (obj.type == "connect.end") {
+    store.clearTarget();
+    document.querySelector("#ws-target-id").textContent = "";
   }
 
   // 🧩 4. Nếu là message chat thường
   if (obj.type == "message.receive") {
+    console.log(rawString);
     appendIncoming(rawString);
   }
   if (obj.type == "request.receive") {

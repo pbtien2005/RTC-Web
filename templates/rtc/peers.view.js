@@ -1,3 +1,4 @@
+import { sendWS } from "./socket.js";
 import { store } from "./store.js";
 
 let peersListEl, targetEl, clearBtnEl;
@@ -8,6 +9,11 @@ export function mountPeers({ listSelector, targerSelector, clearBtnSelector }) {
   clearBtnEl = document.querySelector(clearBtnSelector);
 
   clearBtnEl?.addEventListener("click", () => {
+    sendWS({
+      type: "connect.end",
+      from: store.getClientId(),
+      to: store.getTarget(),
+    });
     store.clearTarget();
     document.querySelector("#ws-target-id").textContent = "";
     renderTarget();

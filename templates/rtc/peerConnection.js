@@ -7,16 +7,51 @@ let onIceCandidateHandler = null;
 let onRemoteTrackHandler = null;
 
 export async function getLocalStream() {
-  localSTream = await navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: true,
-  });
+  try {
+    localSTream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
+  } catch (err) {
+    if (err.name == "NotFoundError" || err.name == "NotAllowedError") {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const hasCamera = devices.some((d) => d.kind === "videoinput");
+      const hasMic = devices.some((d) => d.kind === "audioinput");
+      if (hasMic) {
+        console.log("Chỉ có micro");
+        localSTream = await navigator.mediaDevices.getUserMedia({
+          video: false,
+          audio: true,
+        });
+      } else if (hasCamera) {
+        console.log("Chỉ có camera");
+        localSTream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        });
+      } else {
+        localSTream = null;
+      }
+    }
+    console.log(err);
+  }
   return localSTream;
 }
 export function attachLocalTracks(stream) {
-  stream.getTracks().forEach((track) => {
-    pc.addTrack(track, stream);
-  });
+  if (stream) {
+    // Có track nào thì addTrack track đó
+    const at = stream.getAudioTracks()[0];
+    const vt = stream.getVideoTracks()[0];
+    if (at) pc.addTrack(at, stream);
+    else pc.addTransceiver("audio", { direction: "recvonly" }); // vẫn nhận audio từ peer
+
+    if (vt) pc.addTrack(vt, stream);
+    else pc.addTransceiver("video", { direction: "recvonly" }); // vẫn nhận video từ peer
+  } else {
+    // Không có quyền/thiết bị gì: vẫn có thể tạo kết nối dữ liệu và/hoặc chỉ nhận media
+    pc.addTransceiver("audio", { direction: "recvonly" });
+    pc.addTransceiver("video", { direction: "recvonly" });
+  }
 }
 export function createPeer() {
   const configuration = {

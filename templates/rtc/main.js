@@ -12,6 +12,7 @@ import {
 } from "./peerConnection.js";
 import { appendIncoming } from "./messages.view.js";
 import { setCallState } from "./call.view.js";
+import { onDeviceChanged } from "./call.controller.js";
 
 const client_id = Date.now();
 store.setClientId(client_id);
@@ -83,3 +84,4 @@ window.sendCall = async function (event) {
   CallView.setCallState?.("calling");
   CallView.mount("#video-container");
 };
+navigator.mediaDevices.addEventListener("devicechange", onDeviceChanged);
