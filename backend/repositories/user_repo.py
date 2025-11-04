@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy import select,ScalarResult
 from models.user import User
 
 
@@ -16,5 +16,5 @@ class UserRepository:
         self.db.refresh(new_user)
         return new_user
     
-    def get_user_by_email(self, email: str):
-        return self.db.execute(select(User).where(User.email==email))
+    def get_by_email(self, email: str):
+        return self.db.execute(select(User).where(User.email==email)).scalars().first()

@@ -1,0 +1,31 @@
+from fastapi import APIRouter, Depends,Response
+from sqlalchemy.orm import Session
+from schemas.user_schema import UserOut,UserCreate
+from core.db import get_db
+from core.config import REFRESH_TOKEN_EXPIRE_DAYS
+from services.auth_service import AuthService
+from fastapi import Form
+from schemas.auth_schema import LoginInput
+
+
+router=APIRouter(prefix="/auth",tags=["auths"]) #Tạo nhóm endpoint
+
+@router.post("/register",response_model=UserOut)
+def create_user(payload: UserCreate = Depends(UserCreate.as_form),db: Session=Depends(get_db)):
+    service=AuthService(db)
+    user=service.create_user(payload)
+    return user
+
+@router.post("/login")
+def login(response: Response, payload: LoginInput=Depends(LoginInput.as_form), db: Session=Depends(get_db)):
+    service=AuthService(db)
+    token=service.login(payload=payload)
+    response.set_cookie(
+        key="refresh_token",
+        value=token["refresh_token"],
+        httponly=True,       # Quan trọng: Ngăn JS truy cập
+        max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60, # Thời gian sống của cookie
+        samesite="lax",      # Giảm nguy cơ tấn công CSRF
+        secure=True
+    )
+    return {"access_token": token["access_token"], "token_type": "bearer","user": payload}

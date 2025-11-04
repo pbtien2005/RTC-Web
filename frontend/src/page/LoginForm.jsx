@@ -1,11 +1,9 @@
 import React, { useState } from "react";
-
-export function RegisterForm() {
+import { NavigationBar } from "../components/Navigation/NavigationBar";
+export function LoginForm() {
   const [formData, setFormData] = useState({
-    username: "",
     email: "",
     password: "",
-    confirmPassword: "",
   });
   const [message, setMessage] = useState("");
 
@@ -18,21 +16,19 @@ export function RegisterForm() {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
     const data = new FormData();
-    data.append("username", formData.username);
     data.append("email", formData.email);
     data.append("password", formData.password);
     try {
-      const res = await fetch("http://localhost:8000/users/register", {
+      const res = await fetch("http://localhost:8000/auth/login", {
         method: "POST",
         body: data,
       });
       const result = await res.json();
-      setMessage("Đăng ký thành công cho ${result.username} ");
+      localStorage.setItem("access_token", result.access_token);
+
+      setMessage("Đăng nhập thành công cho ${result.username} ");
+      window.location.href = "/";
     } catch (err) {
       console.error(err);
       setMessage("có lỗi xảy ra khi gửi form!");
@@ -52,8 +48,8 @@ export function RegisterForm() {
             src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
             className="mx-auto h-10 w-auto not-dark:hidden"
           />
-          <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900 dark:text-white">
-            Sign up to your account
+          <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900 dark:text-">
+            Sign in to your account
           </h2>
         </div>
 
@@ -62,34 +58,13 @@ export function RegisterForm() {
             <div>
               <div className="flex items-center justify-between">
                 <label
-                  htmlFor="username"
-                  className="block text-sm/6 font-medium text-gray-900 dark:text-gray-100"
-                >
-                  Username
-                </label>
-              </div>
-              <div className="mt-2">
-                <input
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  required
-                  placeholder="Nhập username"
-                  autoComplete="username"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
-                />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between">
-                <label
                   htmlFor="email"
-                  className="block text-sm/6 font-medium text-gray-900 dark:text-gray-100"
+                  className="block text-sm/6 font-medium text-black-900 dark:text-black-100"
                 >
                   Email address
                 </label>
               </div>
-              <div className="mt-2">
+              <div className="mt-2 ">
                 <input
                   type="email"
                   name="email"
@@ -98,7 +73,7 @@ export function RegisterForm() {
                   required
                   placeholder="you@example.com"
                   autoComplete="email"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
+                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-black dark:outline-black/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
                 />
               </div>
             </div>
@@ -121,29 +96,7 @@ export function RegisterForm() {
                   required
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
-                />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="confirmPassword"
-                  className="block text-sm/6 font-medium text-gray-900 dark:text-gray-100"
-                >
-                  Confirm Password
-                </label>
-              </div>
-              <div className="mt-2">
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
+                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-black dark:outline-black/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
                 />
               </div>
             </div>
@@ -153,7 +106,7 @@ export function RegisterForm() {
                 type="submit"
                 className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-indigo-500 dark:shadow-none dark:hover:bg-indigo-400 dark:focus-visible:outline-indigo-500"
               >
-                Sign up
+                Sign in
               </button>
             </div>
           </form>
