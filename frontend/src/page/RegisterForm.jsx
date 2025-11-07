@@ -37,115 +37,125 @@ export function RegisterForm() {
     }
   };
   return (
-    <>
-      <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <img
-            alt="Your Company"
-            src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-            className="mx-auto h-10 w-auto dark:hidden"
-          />
-          <img
-            alt="Your Company"
-            src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
-            className="mx-auto h-10 w-auto not-dark:hidden"
-          />
-          <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900 dark:text-white">
-            Sign up to your account
-          </h2>
-        </div>
+    <div className="fixed inset-0 w-screen h-screen">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-12 dark:from-gray-900 dark:to-gray-800">
+        <div className="w-full h-full">
+          {/* Logo & Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600 dark:bg-indigo-500 mb-6 shadow-lg">
+              <svg
+                className="w-8 h-8 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Create Account
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Join us today and get started
+            </p>
+          </div>
 
-        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <div className="flex items-center justify-between">
+          {/* Form Card */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700 max-w-md mx-auto">
+            <div className="space-y-6">
+              {/* Email */}
+              <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm/6 font-medium text-gray-900 dark:text-gray-100"
+                  className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2"
                 >
-                  Email address
+                  Email Address
                 </label>
-              </div>
-              <div className="mt-2">
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  required
                   placeholder="you@example.com"
                   autoComplete="email"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 outline-none transition-all duration-200"
                 />
               </div>
-            </div>
 
-            <div>
-              <div className="flex items-center justify-between">
+              {/* Password */}
+              <div>
                 <label
                   htmlFor="password"
-                  className="block text-sm/6 font-medium text-gray-900 dark:text-gray-100"
+                  className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2"
                 >
                   Password
                 </label>
-              </div>
-              <div className="mt-2">
                 <input
                   type="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  required
                   placeholder="••••••••"
-                  autoComplete="current-password"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
+                  autoComplete="new-password"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 outline-none transition-all duration-200"
                 />
               </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between">
+
+              {/* Confirm Password */}
+              <div>
                 <label
                   htmlFor="confirmPassword"
-                  className="block text-sm/6 font-medium text-gray-900 dark:text-gray-100"
+                  className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2"
                 >
                   Confirm Password
                 </label>
-              </div>
-              <div className="mt-2">
                 <input
                   type="password"
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  required
                   placeholder="••••••••"
-                  autoComplete="current-password"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
+                  autoComplete="new-password"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 outline-none transition-all duration-200"
                 />
               </div>
-            </div>
 
-            <div>
+              {/* Submit Button */}
               <button
-                type="submit"
-                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-indigo-500 dark:shadow-none dark:hover:bg-indigo-400 dark:focus-visible:outline-indigo-500"
+                onClick={handleSubmit}
+                className="w-full py-3.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
               >
-                Sign up
+                Sign Up
               </button>
             </div>
-          </form>
 
-          <p className="mt-10 text-center text-sm/6 text-gray-500 dark:text-gray-400">
-            Not a member?{" "}
-            <a
-              href="#"
-              className="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
-            >
-              Start a 14 day free trial
-            </a>
+            {/* Footer Link */}
+            <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+              Already have an account?{" "}
+              <a
+                href="#"
+                className="font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+              >
+                Sign in
+              </a>
+            </p>
+          </div>
+
+          {/* Trial Notice */}
+          <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+            Start your{" "}
+            <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+              14-day free trial
+            </span>{" "}
+            — no credit card required
           </p>
         </div>
       </div>
-    </>
+    </div>
   );
 }

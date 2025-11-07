@@ -1,24 +1,13 @@
 from pydantic import BaseModel, EmailStr
 from fastapi import Form
 
-class UserCreate(BaseModel):
-    username: str
+class UserInput(BaseModel):
+    pass
+
+class UserOuput(BaseModel):
+    user_id: int
     email: EmailStr
-    password: str
+    avatar_url: str
 
-    @classmethod
-    def as_form(
-        cls,
-        username: str=Form(...),
-        email: EmailStr=Form(...),
-        password: str=Form(...)
-    ): return cls(username=username,email=email,password=password)
-
-
-class UserOut(BaseModel):
-    id: int
-    username: str
-    email: EmailStr
-
-    class Config:
-        orm_mode = True
+    
+    model_config = { "from_attributes": True }

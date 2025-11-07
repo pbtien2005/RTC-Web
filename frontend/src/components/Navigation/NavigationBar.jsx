@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import {
   Send,
@@ -34,6 +34,8 @@ export const NavigationBar = () => {
     },
     { id: "create", icon: PlusSquare, label: "Create", path: "/" },
   ];
+  const user = JSON.parse(localStorage.getItem("user"));
+  console.log(user.avatar_url);
 
   return (
     <div className="w-20 bg-white border-r border-gray-200 flex flex-col items-center py-6 space-y-6">
@@ -75,7 +77,7 @@ export const NavigationBar = () => {
       <div className="pt-6 border-t border-gray-200">
         <button className="p-1 rounded-full ring-2 ring-purple-500 bg-transparent">
           <img
-            src="https://api.dicebear.com/7.x/avataaars/svg?seed=User"
+            src={user.avatar_url}
             alt="Profile"
             className="w-10 h-10 rounded-full"
           />

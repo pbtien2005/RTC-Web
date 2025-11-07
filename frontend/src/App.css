@@ -5,6 +5,9 @@
   padding: 2rem;
   text-align: center;
 }
+/* * {
+  color: #000 !important;
+} */
 /* App.css */
 .navigation-bar {
   background-color: #d25454 !important;       /* 🔹 màu nền (đen) */

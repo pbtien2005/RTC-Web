@@ -1,6 +1,6 @@
 from datetime import timedelta
 from repositories.user_repo import UserRepository
-from schemas.user_schema import UserCreate
+from schemas.auth_schema import RegisterInput
 from fastapi import HTTPException, status
 from core.security import hash_password,verify_password,create_token
 from models.user import User
@@ -12,7 +12,7 @@ class AuthService:
     def __init__(self,db):
         self.repo=UserRepository(db)
 
-    def create_user(self, payload: UserCreate):
+    def create_user(self, payload: RegisterInput):
         existing=self.repo.get_by_email(payload.email)
         if existing:
             raise HTTPException(
@@ -22,7 +22,6 @@ class AuthService:
         hashed=hash_password(payload.password)
 
         user_obj=User(
-            username=payload.username,
             email=payload.email,
             password_hash=hashed,
         )
@@ -42,10 +41,10 @@ class AuthService:
                 detail="Wrong password!",
             )
         access_token_expires=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token=create_token(data={"sub":user.id, "email":user.email,"type":"access"},expires_delta=access_token_expires)
+        access_token=create_token(data={"sub":user.user_id, "email":user.email,"type":"access"},expires_delta=access_token_expires)
 
         refesh_token_exprires=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
-        refresh_token=create_token(data={"sub":user.id,"email":user.email,"type":"refresh"},expires_delta=refesh_token_exprires)
-        return {"access_token":access_token,"refresh_token":refresh_token}
+        refresh_token=create_token(data={"sub":user.user_id,"email":user.email,"type":"refresh"},expires_delta=refesh_token_exprires)
+        return {"access_token":access_token,"refresh_token":refresh_token, "data": user}
         
         

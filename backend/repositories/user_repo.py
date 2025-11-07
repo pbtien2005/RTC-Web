@@ -8,7 +8,7 @@ class UserRepository:
         self.db=db
 
     def get_user(self,user_id: int):
-        return self.db.execute(select(User).where(User.id==id))
+        return self.db.execute(select(User).where(User.user_id==id))
 
     def create_user(self, new_user: User):
         self.db.add(new_user)
@@ -18,3 +18,6 @@ class UserRepository:
     
     def get_by_email(self, email: str):
         return self.db.execute(select(User).where(User.email==email)).scalars().first()
+    
+    def get_all_by_role(self,role: str):
+        return self.db.execute(select(User).where(User.role==role)).scalars().all()

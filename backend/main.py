@@ -1,10 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth
+from routers import auth,students
 
 app=FastAPI(debug=True)
 
 app.include_router(auth.router)
+app.include_router(students.router)
 
 origins = [
     "http://localhost:5173",   

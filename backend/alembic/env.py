@@ -6,7 +6,11 @@ from core.config import settings
 from core.db import Base
 from alembic import context
 from models.user import User
+from models.conversation_state import ConversationState
+from models.conversations import Conversation
+from models.user_certificates import UserCertificate
 
+from models.messages import Message
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
