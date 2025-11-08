@@ -51,11 +51,16 @@ export const NavigationBar = () => {
                 setActiveNav(item.id);
                 navigate(item.path);
               }}
-              className={`relative p-3 rounded-xl transition-all flex items-center gap-3 group-hover:w-full ${
+              className={`relative p-3 rounded-xl transition-all
+              flex items-center justify-center           /* center mặc định */
+              group-hover:justify-start group-hover:w-full
+              gap-0 group-hover:gap-3                    /* không gap khi ẩn label */
+              ${
                 isActive
                   ? "bg-white/25 text-white backdrop-blur-sm scale-105"
                   : "text-white/80 hover:text-white hover:bg-white/15 hover:scale-105"
-              } ${isLogo ? "mb-4" : ""}`}
+              }
+              ${isLogo ? "mb-4" : ""}`}
               title={item.label}
             >
               <Icon className={`w-6 h-6 ${isLogo ? "w-7 h-7" : ""} shrink-0`} />

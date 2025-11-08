@@ -1,12 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth,students
+from routers import auth,students,chat
+
+from ws.routes import ws_router
+
 
 app=FastAPI(debug=True)
 
+
 app.include_router(auth.router)
 app.include_router(students.router)
-
+app.include_router(chat.router)
+app.include_router(ws_router)
 origins = [
     "http://localhost:5173",   
     "http://127.0.0.1:5173",
@@ -20,7 +25,5 @@ app.add_middleware(
     allow_headers=["*"],             # cho phép mọi header (Authorization, Content-Type, ...)
 )
 
-@app.on_event("startup")
-def startup_event():
-    print("DB connected")
+
 

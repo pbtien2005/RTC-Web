@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { apiFetch } from "../api/api";
 
 export default function CoachList() {
   const [loading, setLoading] = useState(true);
@@ -75,12 +76,20 @@ export default function CoachList() {
   };
 
   // Handle message
-  const handleMessage = (coachId) => {
+  const handleMessage = async (coachId) => {
     // TODO: Navigate to message page or open chat
     // navigate(`/messages/${coachId}`);
-
-    alert(`Mở chat với coach ID: ${coachId}`);
-    console.log("Message coach:", coachId);
+    const data = coachId;
+    console.log(typeof data);
+    try {
+      const res = await apiFetch("/chat/request", {
+        method: "POST",
+        body: JSON.stringify({ target_id: coachId, intro_text: "hello" }),
+      });
+    } catch (err) {
+      console.error(err);
+      setMessage("cos lỗi xảy ra khi gửi chat request:", err);
+    }
   };
 
   if (loading) {
@@ -204,7 +213,7 @@ export default function CoachList() {
                 <div className="space-y-2 mt-4">
                   {/* Đăng ký Button */}
                   <button
-                    onClick={() => handleRegister(coach.id)}
+                    onClick={() => handleRegister(coach.user_id)}
                     className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg"
                   >
                     <svg
@@ -225,7 +234,7 @@ export default function CoachList() {
 
                   {/* Nhắn tin Button */}
                   <button
-                    onClick={() => handleMessage(coach.id)}
+                    onClick={() => handleMessage(coach.user_id)}
                     className="w-full py-2.5 px-4 rounded-xl bg-white dark:bg-gray-700 border-2 border-indigo-600 dark:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-gray-600 text-indigo-600 dark:text-indigo-400 font-semibold text-sm transition-all duration-200 flex items-center justify-center space-x-2"
                   >
                     <svg

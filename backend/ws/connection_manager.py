@@ -1,5 +1,7 @@
 import json
 from fastapi import WebSocket
+
+
 class ConnectionManager:
     def __init__(self):
         self.active_connections: dict[str,WebSocket]={}
@@ -40,9 +42,11 @@ class ConnectionManager:
                 continue  # tránh crash nếu WS đã đóng
 
 
-    async def send_1_to_1(self, sender_id: str, target_id: str, message: str,type: str):
+    async def send_1_to_1(self,type: str, sender_id: str, target_id: str, message: str):
         """Gửi riêng 1-1"""
         ws = self.active_connections.get(target_id)
         if ws:
             payload = {"type":type,"id": sender_id, "data": message}
             await ws.send_text(json.dumps(payload))
+
+manager=ConnectionManager()

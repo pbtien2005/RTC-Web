@@ -41,10 +41,10 @@ class AuthService:
                 detail="Wrong password!",
             )
         access_token_expires=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token=create_token(data={"sub":user.user_id, "email":user.email,"type":"access"},expires_delta=access_token_expires)
+        access_token=create_token(data={"sub":str(user.user_id), "email":user.email,"type":"access"},expires_delta=access_token_expires)
 
         refesh_token_exprires=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
-        refresh_token=create_token(data={"sub":user.user_id,"email":user.email,"type":"refresh"},expires_delta=refesh_token_exprires)
+        refresh_token=create_token(data={"sub":str(user.user_id),"email":user.email,"type":"refresh"},expires_delta=refesh_token_exprires)
         return {"access_token":access_token,"refresh_token":refresh_token, "data": user}
         
         

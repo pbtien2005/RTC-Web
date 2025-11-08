@@ -81,6 +81,16 @@ class User(Base):
     states: Mapped[List["ConversationState"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    message_requests_sent: Mapped[list["MessageRequest"]] = relationship(
+        back_populates="requester",
+        foreign_keys="MessageRequest.requester_id"
+    )
+
+    # Người nhận yêu cầu
+    message_requests_received: Mapped[list["MessageRequest"]] = relationship(
+        back_populates="target",
+        foreign_keys="MessageRequest.target_id"
+    )
 
     def __repr__(self) -> str:
         return f"<User id={self.user_id} email={self.email} role={self.role}>"

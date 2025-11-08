@@ -1,6 +1,6 @@
 from passlib.context import CryptContext
 from jose import JWTError, jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,timezone
 from core.config import SECRET_KEY,ALGORITHM_TOKEN
 
 # tạo context hash với thuật toán bcrypt
@@ -16,7 +16,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_token(data: dict, expires_delta: timedelta) -> str:
     to_encode=data.copy() #Tao ban sao cua du lieu
-    expire=datetime.utcnow()+expires_delta #Tinh toan thoi diem het han
+    if "sub" in to_encode:
+        to_encode["sub"] = str(to_encode["sub"])
+    expire=datetime.now(timezone.utc)+expires_delta #Tinh toan thoi diem het han
     to_encode.update({"exp":expire})
     encode_jwt=jwt.encode(to_encode,SECRET_KEY,algorithm=ALGORITHM_TOKEN) #Tạo ra cấu trúc JWT và mã hóa chúng
     return encode_jwt
