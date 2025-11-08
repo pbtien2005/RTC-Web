@@ -29,7 +29,7 @@ export const ConversationItem = ({ conversation, isSelected, onClick }) => {
             {conversation.lastMessage}
           </p>
           {conversation.unread > 0 && (
-            <span className="ml-2 bg-purple-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0">
+            <span className="ml-2 bg-gradient-to-b from-[#E90000] to-[#FAA6FF] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0">
               {conversation.unread}
             </span>
           )}

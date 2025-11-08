@@ -21,7 +21,7 @@ export const MessageItem = ({ message }) => {
           <div
             className={`px-4 py-2 rounded-2xl ${
               message.sender === "me"
-                ? "bg-purple-600 text-white rounded-br-sm"
+                ? "bg-blue-600 text-white rounded-br-sm"
                 : "bg-white text-gray-900 rounded-bl-sm"
             }`}
           >

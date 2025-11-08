@@ -36,7 +36,7 @@ export const MessageInput = ({ message, setMessage, onSend }) => {
 
         <button
           onClick={onSend}
-          className="p-3 bg-purple-600 hover:bg-purple-700 rounded-full transition-colors"
+          className="p-3 bg-gradient-to-b from-[#E90000] to-[#FAA6FF] hover:bg-purple-700 rounded-full transition-colors"
         >
           <Send className="w-5 h-5 text-white" />
         </button>

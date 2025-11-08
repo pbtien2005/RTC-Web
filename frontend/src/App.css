@@ -10,7 +10,7 @@
 } */
 /* App.css */
 .navigation-bar {
-  background-color: #d25454 !important;       /* 🔹 màu nền (đen) */
+     /* 🔹 màu nền (đen) */
   height: 100%;                    /* chiếm full chiều cao của khung */
   width: 80px;                     /* tương ứng w-20 trong Tailwind */
   display: flex;
@@ -21,6 +21,7 @@
   position: fixed;                 /* cố định taskbar khi cuộn */
   left: 0;
   top: 0;
+  bottom: 0;
 }
 
 /* 🟣 Hover đổi màu (nếu muốn) */
