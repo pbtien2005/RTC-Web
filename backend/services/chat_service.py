@@ -22,6 +22,7 @@ class ChatRequestService:
         # Rule: check pending trùng (idempotent)
         existing = self.repo.get_pending_request(requester_id, target_id)
         if existing:
+            print("alo")
             raise HTTPException(409, "Request already pending")
 
 

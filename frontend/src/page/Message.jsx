@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Sidebar } from "../components/Sidebar/Sidebar";
-import { ChatArea } from "../chat/ChatArea";
+import { ChatArea } from "../components/chat/ChatArea";
 export function Message() {
   const [selectedChat, setSelectedChat] = useState(0);
   const [message, setMessage] = useState("");

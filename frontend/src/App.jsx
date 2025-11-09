@@ -2,7 +2,7 @@ import "./App.css";
 import { RegisterForm } from "./page/RegisterForm";
 import { LoginForm } from "./page/LoginForm";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Home from "./page/Home";
+import CoachList from "./page/CoachList";
 import AppLayout from "./AppLayout";
 import { Message } from "./page/message";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -17,7 +17,7 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<CoachList />} />
           <Route path="/message" element={<Message />} />
         </Route>
 
