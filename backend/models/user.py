@@ -22,6 +22,7 @@ class User(Base):
 
     user_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
+    username: Mapped[str]=mapped_column(String(255),nullable=True,default="none")
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(Text, nullable=False)
 

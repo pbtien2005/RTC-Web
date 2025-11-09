@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { apiFetch } from "../api/api";
-import { useNotification } from "../../hook/useNotification";
+import { useNotification } from "../hook/useNotification";
 import NotificationToast from "../components/NotificationToast";
 
 export default function CoachList() {
@@ -10,6 +10,7 @@ export default function CoachList() {
 
   const { notification, showSuccess, showError, hideNotification } =
     useNotification();
+
   useEffect(() => {
     fetchCoaches();
   }, []);

@@ -1,5 +1,5 @@
 import { tryParseJSON } from "./utils.js";
-import { store } from "./store.js";
+import { store } from "../../frontend/src/ws/store.js";
 
 export function appendIncoming(rawString) {
   const messages = document.getElementById("messages");

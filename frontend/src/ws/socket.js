@@ -6,6 +6,7 @@ export function connectWS(url, onRawMessage) {
   ws.onclose = () => console.log("❌ WS closed");
   ws.onerror = (err) => console.error("⚠️ WS error:", err);
   ws.onopen = () => console.log("✅ WS connected:", url);
+  return ws;
 }
 
 export function sendWS(obj) {

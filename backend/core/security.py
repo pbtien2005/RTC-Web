@@ -22,3 +22,4 @@ def create_token(data: dict, expires_delta: timedelta) -> str:
     to_encode.update({"exp":expire})
     encode_jwt=jwt.encode(to_encode,SECRET_KEY,algorithm=ALGORITHM_TOKEN) #Tạo ra cấu trúc JWT và mã hóa chúng
     return encode_jwt
+

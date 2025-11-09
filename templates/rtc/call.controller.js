@@ -1,4 +1,4 @@
-import { store } from "./store.js";
+import { store } from "../../frontend/src/ws/store.js";
 import {
   createPeer,
   setIceHandler,
@@ -13,7 +13,7 @@ import {
   bindRemoteStream,
   setCallState,
 } from "./call.view.js";
-import { sendWS } from "./socket.js";
+import { sendWS } from "../../frontend/src/ws/socket.js";
 
 let currentTarget = null;
 

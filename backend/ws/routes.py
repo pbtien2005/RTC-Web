@@ -1,10 +1,12 @@
 from fastapi import APIRouter, FastAPI,WebSocket, WebSocketDisconnect,Request,Depends
+from sqlalchemy.orm import Session
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 import json
 from fastapi.staticfiles import StaticFiles
 from ws.connection_manager import ConnectionManager
 from auth.dependencies import get_current_user
+from core.db import get_db
 
 
 ws_router=APIRouter()
@@ -13,10 +15,11 @@ ws_router=APIRouter()
 manager=ConnectionManager()
 
 
-@ws_router.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket,user=Depends(get_current_user)):
+@ws_router.websocket("/ws/{token}")
+async def websocket_endpoint(websocket: WebSocket,token:str,db: Session=Depends(get_db)):
+    user=get_current_user(token,db)
     await manager.connect(websocket,user.user_id) #Nhan ket noi tu client
-    
+    print("alo")
     try:
         while True:
             data=await websocket.receive_text()

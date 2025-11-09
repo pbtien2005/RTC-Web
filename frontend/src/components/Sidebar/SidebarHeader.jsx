@@ -4,7 +4,9 @@ export const SidebarHeader = ({ onClose }) => {
   return (
     <div className="p-4 border-b border-gray-200">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-purple-600">PieChat</h1>
+        <h1 className="p-1 text-2xl font-bold bg-gradient-to-b from-[#E90000] to-[#FAA6FF] text-white rounded-lg">
+          Chat
+        </h1>
         <button
           onClick={onClose}
           className="p-2 hover:bg-gray-100 rounded-full transition-colors"

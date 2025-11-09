@@ -1,9 +1,9 @@
 from fastapi import APIRouter,Depends,Response
 from core.db import get_db
-from schemas.chat_schema import ChatRequestInput,ChatRequestOut
+from schemas.chat_request_schema import ChatRequestInput,ChatRequestOut
 from sqlalchemy.orm import Session
 from auth.dependencies import get_current_user
-from services.chat_service import ChatRequestService
+from services.chat_request_service import ChatRequestService
 from ws.routes import manager
 router=APIRouter(prefix="/chat",tags=["chat"])
 

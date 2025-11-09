@@ -1,5 +1,5 @@
-import { sendWS } from "./socket.js";
-import { store } from "./store.js";
+import { sendWS } from "../../frontend/src/ws/socket.js";
+import { store } from "../../frontend/src/ws/store.js";
 
 let peersListEl, targetEl, clearBtnEl;
 

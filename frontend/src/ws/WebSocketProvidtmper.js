@@ -1,20 +1,21 @@
 import { store } from "./store.js";
 import { connectWS, sendWS } from "./socket.js";
 import { handleIncoming } from "./dispatcher.js";
-import { mountPeers } from "./peers.view.js";
-import * as CallView from "./call.view.js";
-import { startCall } from "./call.controller.js";
+import { mountPeers } from "../../../templates/rtc/peers.view.js";
+import * as CallView from "../../../templates/rtc/call.view.js";
+import { startCall } from "../../../templates/rtc/call.controller.js";
 import {
   applyOfferAndMakeAnswer,
   closePeer,
   toggleCam,
   toggleMic,
-} from "./peerConnection.js";
-import { appendIncoming } from "./messages.view.js";
-import { setCallState } from "./call.view.js";
-import { onDeviceChanged } from "./call.controller.js";
+} from "../../../templates/rtc/peerConnection.js";
+import { appendIncoming } from "../../../templates/rtc/messages.view.js";
+import { setCallState } from "../../../templates/rtc/call.view.js";
+import { onDeviceChanged } from "../../../templates/rtc/call.controller.js";
+import { getCurrentUserId } from "../hook/GetCurrentUserId.jsx";
 
-const client_id = Date.now();
+const client_id = getCurrentUserId();
 store.setClientId(client_id);
 
 document.querySelector("#ws-id").textContent = client_id;

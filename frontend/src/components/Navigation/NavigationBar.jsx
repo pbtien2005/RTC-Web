@@ -28,11 +28,10 @@ export const NavigationBar = () => {
       icon: BellRing,
       label: "Notifications",
       badge: notificationCount,
-      path: "/",
+      path: "/notification",
     },
   ];
   const user = JSON.parse(localStorage.getItem("user"));
-  console.log(user.avatar_url);
 
   return (
     <div className="fixed inset-y-0 w-20 bg-gradient-to-b from-[#E90000] to-[#FAA6FF] border-r border-[#ff1a1a] flex flex-col items-center py-6 space-y-6 transition-all duration-300 hover:w-21">

@@ -1,20 +1,20 @@
 import { store } from "./store.js";
-import { appendIncoming } from "./messages.view.js";
-import { upsertPeerAndRender } from "./peers.view.js"; // thêm dòng này
-import { renderPeers } from "./peers.view.js";
-import { showIncomingRequest } from "./request.view.js";
-import { renderTarget } from "./peers.view.js";
+import { appendIncoming } from "../../../templates/rtc/messages.view.js";
+import { upsertPeerAndRender } from "../../../templates/rtc/peers.view.js"; // thêm dòng này
+import { renderPeers } from "../../../templates/rtc/peers.view.js";
+import { showIncomingRequest } from "../../../templates/rtc/request.view.js";
+import { renderTarget } from "../../../templates/rtc/peers.view.js";
 import { sendWS } from "./socket.js";
-import * as CallView from "./call.view.js";
+import * as CallView from "../../../templates/rtc/call.view.js";
 import {
   addIce,
   applyAnswer,
   applyOfferAndMakeAnswer,
   createPeer,
-} from "./peerConnection.js";
-import { startCall } from "./call.controller.js";
-import { tryParseJSON } from "./utils.js";
-import { closePeer } from "./peerConnection.js";
+} from "../../../templates/rtc/peerConnection.js";
+import { startCall } from "../../../templates/rtc/call.controller.js";
+import { tryParseJSON } from "../../../templates/rtc/utils.js";
+import { closePeer } from "../../../templates/rtc/peerConnection.js";
 
 export async function handleIncoming(rawString) {
   let obj;
