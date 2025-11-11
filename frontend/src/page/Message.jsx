@@ -5,7 +5,7 @@ import { ChatArea } from "../components/chat/ChatArea";
 
 import { getCurrentUserId } from "../hook/GetCurrentUserId";
 import { registerUI } from "../ws/dispatcher.js";
-
+import { useVideoCall } from "../videoCall/VideoCallContext.jsx";
 export function Message() {
   const [selectedChat, setSelectedChat] = useState(null);
   const [message, setMessage] = useState("");
@@ -14,7 +14,7 @@ export function Message() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const { requestCall } = useVideoCall();
   // Sử dụng ref để lưu giá trị mới nhất
   const selectedChatRef = useRef(selectedChat);
   const conversationsRef = useRef(conversations);
@@ -125,6 +125,7 @@ export function Message() {
           // Transform API response to match component props
           const transformedConversations = list.map((conv) => ({
             id: conv.id,
+            receiver_id: conv.participant.id,
             name: conv.participant.name,
             avatar:
               conv.participant.avatar ||
@@ -284,14 +285,38 @@ export function Message() {
       </div>
     );
   }
-  const oncall = () => {};
+  const onCall = () => {
+    return;
+  };
+
   const onVideoCall = async () => {
     if (selectedChat !== null) {
       const conversation = conversations[selectedChat];
-      await initiateCall(conversation.id, {
-        name: conversation.name,
-        avatar: conversation.avatar,
-      });
+      const raw = localStorage.getItem("user");
+      const user = raw ? JSON.parse(raw) : null;
+
+      console.log(user);
+      const callerInfo = {
+        id: user.user_id,
+        username: user.username,
+        avatar_url: user.avatar_url,
+      };
+      const calleeInfo = {
+        id: conversation.receiver_id,
+        username: conversation.name,
+        avatar_url: conversation.avatar,
+      };
+      console.log(callerInfo);
+      console.log(calleeInfo);
+
+      const success = await requestCall(
+        conversation.id,
+        callerInfo,
+        calleeInfo
+      );
+      if (!success) {
+        alert("Failed to request call");
+      }
     }
   };
   // Empty state

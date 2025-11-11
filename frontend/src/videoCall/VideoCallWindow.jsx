@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useVideoCall } from "../../contexts/VideoCallContext";
+import { useVideoCall } from "./VideoCallContext";
 import {
   Phone,
   PhoneOff,
@@ -60,7 +60,7 @@ export const VideoCallWindow = () => {
             {/* Caller info overlay */}
             <div className="absolute top-2 left-2 bg-black bg-opacity-50 rounded px-2 py-1">
               <p className="text-white text-xs font-medium">
-                {callState.callerInfo?.name || "Unknown"}
+                {callState.callerInfo?.username || "Unknown"}
               </p>
             </div>
 

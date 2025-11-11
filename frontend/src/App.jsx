@@ -10,6 +10,9 @@ import NotificationsPage from "./page/NotificationsPage";
 import WebSocketProvider from "./ws/WebSocketProvider";
 import { VideoCallProvider } from "./videoCall/VideoCallContext";
 import { ws } from "./ws/socket";
+import { IncomingCallPopup } from "./videoCall/IncomingCallPopup";
+import { RingingScreen } from "./videoCall/RingingScreen";
+import { VideoCallWindow } from "./videoCall/VideoCallWindow";
 function App() {
   const wsUrl = `ws://localhost:8000/ws`;
   return (
@@ -18,11 +21,14 @@ function App() {
         <Route
           element={
             <ProtectedRoute>
-              <WebSocketProvider wsUrl={wsUrl}>
-                <VideoCallProvider ws={ws}>
+              <VideoCallProvider>
+                <WebSocketProvider wsUrl={wsUrl}>
                   <AppLayout />
-                </VideoCallProvider>
-              </WebSocketProvider>
+                  <IncomingCallPopup />
+                  <RingingScreen />
+                  <VideoCallWindow />
+                </WebSocketProvider>
+              </VideoCallProvider>
             </ProtectedRoute>
           }
         >

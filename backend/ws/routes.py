@@ -29,20 +29,10 @@ async def websocket_endpoint(websocket: WebSocket,db: Session=Depends(get_db)):
     try:
         while True:
             data=await websocket.receive_text()
-            try:
-                payload = json.loads(data)
-            except json.JSONDecodeError:
-                payload = {"data": data}  
-                type=payload.get("type")
-                to_id=payload.get("to")   
-                data=payload.get("data")
-                await wsManager.send_personal_message(client_id, "invalid JSON", websocket)
-                continue
-           
-         
-
-            await wsManager.send_1_to_1(type,client_id,to_id,data)
-
+            
+            payload = json.loads(data)
+            await wsManager.send_1_to_1(payload)
+            print(payload)
             # if payload.get("type")=="message.send":
             #     if to_id is not None:
             #         await manager.send_1_to_1(client_id,str(to_id),f'{payload.get("id")}: {payload.get("data")}',"message.receive")

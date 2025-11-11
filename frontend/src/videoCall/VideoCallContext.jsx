@@ -6,20 +6,18 @@ import React, {
   useEffect,
 } from "react";
 import { getCurrentUserId } from "../hook/GetCurrentUserId";
-import { store } from "../ws/store";
-import { sendWS } from "../ws/socket";
+import { sendWS } from "../ws/socket.js";
 import {
-  createPeer,
-  setIceHandler,
-  attachLocalTracks,
   getLocalStream,
-  onRemoteTrack,
+  attachLocalTracks,
+  createPeer,
   makeOffer,
+  applyOfferAndMakeAnswer,
+  setIceHandler,
+  onRemoteTrack,
   closePeer,
-  setRemoteDescription,
-  addIceCandidate,
-  makeAnswer,
-} from "./peerConnection.js";
+} from "./peerConnection";
+import { registerUI } from "../ws/dispatcher.js";
 
 const VideoCallContext = createContext();
 
@@ -38,13 +36,16 @@ export const VideoCallProvider = ({ children }) => {
     isMuted: false,
     isVideoOff: false,
     callerInfo: null,
+    calleeInfo: null,
     conversationId: null,
-    callStatus: "idle", // idle, calling, connecting, connected, ended
+    callStatus: "idle", // idle, ringing, connecting, connected, ended
+    hasRemoteStream: false,
   });
 
   const localStreamRef = useRef(null);
   const remoteStreamRef = useRef(null);
   const [incomingCall, setIncomingCall] = useState(null);
+  const pendingCallRef = useRef(null); // Lưu thông tin cuộc gọi đang chờ accept
 
   // Xử lý khi nhận được remote stream
   useEffect(() => {
@@ -61,123 +62,91 @@ export const VideoCallProvider = ({ children }) => {
     });
   }, []);
 
-  // Khởi tạo video call (caller)
-  const initiateCall = async (conversationId, callerInfo) => {
+  // 🔵 BƯỚC 1: Gửi yêu cầu gọi (CALLER)
+  const requestCall = async (conversationId, callerInfo, calleeInfo) => {
     try {
-      console.log("🔵 Initiating call to:", callerInfo.name);
+      console.log("📞 Requesting call to:", calleeInfo.username);
 
-      // Set target trong store
-      store.setTarget(callerInfo.userId || callerInfo.id);
+      // Lưu thông tin để dùng sau khi callee accept
+      pendingCallRef.current = {
+        conversationId,
+        callerInfo,
+        calleeInfo,
+      };
 
+      // Chỉ set trạng thái "ringing" chứ chưa init peer
       setCallState({
-        isInCall: true,
+        isInCall: false, // Chưa vào call
         isMinimized: false,
         isMuted: false,
         isVideoOff: false,
         callerInfo,
+        calleeInfo,
         conversationId,
-        callStatus: "calling",
+        callStatus: "ringing", // Đang đổ chuông
+        hasRemoteStream: false,
       });
 
-      // 1️⃣ Tạo peer connection
-      createPeer();
-
-      // 2️⃣ Setup ICE handler
-      setIceHandler((candidate) => {
-        if (!candidate) return;
-        console.log("🧊 Sending ICE candidate");
-        sendWS({
-          type: "call.ice",
-          from: getCurrentUserId(),
-          to: callerInfo.userId || callerInfo.id,
-          conversationId,
-          data: candidate,
-        });
-      });
-
-      // 3️⃣ Lấy local stream
-      const localStream = await getLocalStream();
-      localStreamRef.current = localStream;
-      attachLocalTracks(localStream);
-
-      // 4️⃣ Tạo offer
-      const offer = await makeOffer();
-
-      setCallState((prev) => ({ ...prev, callStatus: "connecting" }));
-
-      // 5️⃣ Gửi offer qua WebSocket
+      // Gửi request qua WebSocket
       sendWS({
-        type: "call.offer",
-        from: getCurrentUserId(),
-        to: callerInfo.userId || callerInfo.id,
-        conversationId,
-        data: offer,
+        type: "call.request",
+        sender_id: callerInfo.id,
+        receiver_id: calleeInfo.id,
+        data: {
+          sender_name: callerInfo.username,
+          sender_avatar: callerInfo.avatar_url,
+          conversation_id: conversationId,
+          caller_info: callerInfo,
+        },
       });
 
       return true;
     } catch (error) {
-      console.error("❌ Error initiating call:", error);
-      endCall();
+      console.error("❌ Error requesting call:", error);
+      pendingCallRef.current = null;
+      setCallState((prev) => ({ ...prev, callStatus: "idle" }));
       return false;
     }
   };
 
-  // Nhận cuộc gọi (receiver)
+  // 🟢 BƯỚC 2: Callee nhận được request và accept
   const acceptCall = async () => {
     if (!incomingCall) return false;
 
     try {
-      console.log("🟢 Accepting call from:", incomingCall.callerInfo.name);
+      console.log("🟢 Accepting call from:", incomingCall.callerInfo.username);
+      const { callerInfo, conversationId } = incomingCall;
+      const raw = localStorage.getItem("user");
+      const user = JSON.parse(raw);
+      const calleeInfo = {
+        id: user.user_id,
+        username: user.username,
+        avatar_url: user.avatar_url,
+      };
 
-      const { offer, callerInfo, conversationId } = incomingCall;
-
+      // Set trạng thái đang chờ
       setCallState({
-        isInCall: true,
+        isInCall: false,
         isMinimized: false,
         isMuted: false,
         isVideoOff: false,
         callerInfo,
+        calleeInfo,
         conversationId,
         callStatus: "connecting",
+        hasRemoteStream: false,
       });
 
-      // 1️⃣ Tạo peer connection
-      createPeer();
-
-      // 2️⃣ Setup ICE handler
-      setIceHandler((candidate) => {
-        if (!candidate) return;
-        console.log("🧊 Sending ICE candidate");
-        sendWS({
-          type: "call.ice",
-          from: getCurrentUserId(),
-          to: callerInfo.userId || callerInfo.id,
-          conversationId,
-          data: candidate,
-        });
-      });
-
-      // 3️⃣ Lấy local stream
-      const localStream = await getLocalStream();
-      localStreamRef.current = localStream;
-      attachLocalTracks(localStream);
-
-      // 4️⃣ Set remote description (offer)
-      await setRemoteDescription(offer);
-
-      // 5️⃣ Tạo answer
-      const answer = await makeAnswer();
-
-      // 6️⃣ Gửi answer qua WebSocket
+      // Gửi accept về cho caller
       sendWS({
-        type: "call.answer",
-        from: getCurrentUserId(),
-        to: callerInfo.userId || callerInfo.id,
-        conversationId,
-        data: answer,
+        type: "call.accept",
+        sender_id: getCurrentUserId(),
+        receiver_id: callerInfo.id,
       });
 
       setIncomingCall(null);
+
+      // Chưa init peer ở đây, đợi nhận offer từ caller
       return true;
     } catch (error) {
       console.error("❌ Error accepting call:", error);
@@ -186,18 +155,140 @@ export const VideoCallProvider = ({ children }) => {
     }
   };
 
+  // 🔵 BƯỚC 3: Caller nhận được accept, bắt đầu init peer và tạo offer
+  const handleCallAccepted = async () => {
+    if (!pendingCallRef.current) {
+      console.error("❌ No pending call to accept");
+      return;
+    }
+
+    const { conversationId, callerInfo, calleeInfo } = pendingCallRef.current;
+
+    console.log("✅ Call accepted, initializing peer connection...");
+
+    setCallState((prev) => ({
+      ...prev,
+      isInCall: true,
+      callStatus: "connecting",
+    }));
+
+    // 1️⃣ Tạo peer connection
+    createPeer();
+
+    // 2️⃣ Setup ICE handler
+    setIceHandler((candidate) => {
+      if (!candidate) return;
+      console.log("🧊 Sending ICE candidate");
+      sendWS({
+        type: "call.ice",
+        sender_id: callerInfo.id,
+        receiver_id: calleeInfo.id,
+        data: candidate,
+      });
+    });
+
+    // 3️⃣ Lấy local stream
+    const localStream = await getLocalStream();
+    localStreamRef.current = localStream;
+    attachLocalTracks(localStream);
+
+    // 4️⃣ Tạo offer
+    const offer = await makeOffer();
+
+    // 5️⃣ Gửi offer qua WebSocket
+    sendWS({
+      type: "call.offer",
+      sender_id: callerInfo.id,
+      receiver_id: calleeInfo.id,
+      data: offer,
+    });
+
+    console.log("📤 Offer sent");
+    pendingCallRef.current = null;
+  };
+
+  // 🟢 BƯỚC 4: Callee nhận offer, init peer và tạo answer
+  const handleCallOffer = async (offer) => {
+    console.log("📥 Received offer, creating answer...");
+
+    setCallState((prev) => ({
+      ...prev,
+      isInCall: true,
+      callStatus: "connecting",
+    }));
+
+    // 1️⃣ Tạo peer connection
+    createPeer();
+
+    // 2️⃣ Setup ICE handler
+    setIceHandler((candidate) => {
+      if (!candidate) return;
+      console.log("🧊 Sending ICE candidate");
+      sendWS({
+        type: "call.ice",
+        sender_id: callState.calleeInfo.id,
+        receiver_id: callState.callerInfo.id,
+        data: candidate,
+      });
+    });
+
+    // 3️⃣ Lấy local stream
+    const localStream = await getLocalStream();
+    localStreamRef.current = localStream;
+    attachLocalTracks(localStream);
+
+    // 4️⃣ Apply offer và tạo answer
+    const answer = await applyOfferAndMakeAnswer(offer);
+
+    // 5️⃣ Gửi answer qua WebSocket
+    sendWS({
+      type: "call.answer",
+      sender_id: callState.calleeInfo.id,
+      receiver_id: callState.callerInfo.id,
+      data: answer,
+    });
+
+    console.log("📤 Answer sent");
+  };
+
   // Từ chối cuộc gọi
   const declineCall = () => {
     if (!incomingCall) return;
 
     sendWS({
       type: "call.decline",
-      from: getCurrentUserId(),
-      to: incomingCall.callerInfo.userId || incomingCall.callerInfo.id,
-      conversationId: incomingCall.conversationId,
+      sender_id: getCurrentUserId(),
+      receiver_id: incomingCall.callerInfo.id,
     });
 
     setIncomingCall(null);
+    setCallState((prev) => ({ ...prev, callStatus: "idle" }));
+  };
+
+  // Hủy cuộc gọi (caller hủy trước khi callee accept)
+  const cancelCall = () => {
+    if (!pendingCallRef.current) return;
+
+    const { calleeInfo } = pendingCallRef.current;
+
+    sendWS({
+      type: "call.cancel",
+      sender_id: getCurrentUserId(),
+      receiver_id: calleeInfo.id,
+    });
+
+    pendingCallRef.current = null;
+    setCallState({
+      isInCall: false,
+      isMinimized: false,
+      isMuted: false,
+      isVideoOff: false,
+      callerInfo: null,
+      calleeInfo: null,
+      conversationId: null,
+      callStatus: "idle",
+      hasRemoteStream: false,
+    });
   };
 
   // Kết thúc cuộc gọi
@@ -213,17 +304,17 @@ export const VideoCallProvider = ({ children }) => {
     closePeer();
 
     // Gửi thông báo kết thúc
-    if (callState.conversationId && callState.callerInfo) {
+    if (callState.conversationId && callState.calleeInfo) {
       sendWS({
         type: "call.end",
-        from: getCurrentUserId(),
-        to: callState.callerInfo.userId || callState.callerInfo.id,
-        conversationId: callState.conversationId,
+        sender_id: getCurrentUserId(),
+        receiver_id: callState.calleeInfo.id,
       });
     }
 
     localStreamRef.current = null;
     remoteStreamRef.current = null;
+    pendingCallRef.current = null;
 
     setCallState({
       isInCall: false,
@@ -231,8 +322,10 @@ export const VideoCallProvider = ({ children }) => {
       isMuted: false,
       isVideoOff: false,
       callerInfo: null,
+      calleeInfo: null,
       conversationId: null,
       callStatus: "idle",
+      hasRemoteStream: false,
     });
   };
 
@@ -263,54 +356,6 @@ export const VideoCallProvider = ({ children }) => {
     setCallState((prev) => ({ ...prev, isMinimized: !prev.isMinimized }));
   };
 
-  // Xử lý WebSocket messages
-  const handleCallMessage = async (message) => {
-    try {
-      switch (message.type) {
-        case "call.offer":
-          console.log("📞 Received call offer from:", message.from);
-          setIncomingCall({
-            offer: message.data,
-            callerInfo: {
-              userId: message.from,
-              name: message.callerName || "Unknown",
-              avatar: message.callerAvatar,
-            },
-            conversationId: message.conversationId,
-          });
-          break;
-
-        case "call.answer":
-          console.log("✅ Received call answer");
-          await setRemoteDescription(message.data);
-          setCallState((prev) => ({ ...prev, callStatus: "connected" }));
-          break;
-
-        case "call.ice":
-          console.log("🧊 Received ICE candidate");
-          await addIceCandidate(message.data);
-          break;
-
-        case "call.decline":
-          console.log("❌ Call declined");
-          endCall();
-          alert("Call was declined");
-          break;
-
-        case "call.end":
-          console.log("🔴 Call ended by remote");
-          endCall();
-          break;
-
-        default:
-          break;
-      }
-    } catch (error) {
-      console.error("Error handling call message:", error);
-    }
-  };
-
-  // Monitor device changes
   useEffect(() => {
     const handleDeviceChange = async () => {
       console.log("📸 Device changed");
@@ -348,16 +393,25 @@ export const VideoCallProvider = ({ children }) => {
     localStreamRef,
     remoteStreamRef,
     incomingCall,
-    initiateCall,
+    requestCall, // Đổi tên từ initiateCall -> requestCall
     acceptCall,
     declineCall,
+    cancelCall, // Thêm cancel
     endCall,
     toggleMute,
     toggleVideo,
     toggleMinimize,
-    handleCallMessage, // Export để dùng trong WebSocket handler
   };
-
+  useEffect(() => {
+    registerUI({
+      setCallState: (e) => setCallState(e),
+      handleCallAccepted: () => handleCallAccepted(),
+      setIncomingCall: (e) => setIncomingCall(e),
+      handleCallOffer: (e) => handleCallOffer(e),
+      endCall: () => endCall(),
+      pendingCallRef: pendingCallRef,
+    });
+  });
   return (
     <VideoCallContext.Provider value={value}>
       {children}

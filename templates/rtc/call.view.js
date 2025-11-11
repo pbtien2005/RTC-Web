@@ -1,7 +1,3 @@
-import { store } from "../../frontend/src/ws/store.js";
-import { closePeer } from "../../frontend/src/videoCall/peerConnection.js";
-import { sendWS } from "../../frontend/src/ws/socket.js";
-
 let root = null;
 let state = "idle"; // idle|calling|ringing|connecting|connected|ended
 let host = "";

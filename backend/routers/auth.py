@@ -5,7 +5,7 @@ from core.db import get_db
 from core.config import REFRESH_TOKEN_EXPIRE_DAYS
 from services.auth_service import AuthService,rotate_refresh_and_issue_access
 from fastapi import Form
-from schemas.auth_schema import LoginInput
+from schemas.auth_schema import LoginInput,LoginOut
 
 
 router=APIRouter(prefix="/auth",tags=["auths"]) #Tạo nhóm endpoint
@@ -16,7 +16,7 @@ def create_user(payload: RegisterInput = Depends(RegisterInput.as_form),db: Sess
     user=service.create_user(payload)
     return user
 
-@router.post("/login")
+@router.post("/login",response_model=LoginOut)
 def login(response: Response, payload: LoginInput=Depends(LoginInput.as_form), db: Session=Depends(get_db)):
     service=AuthService(db)
     token=service.login(payload=payload)
@@ -28,7 +28,7 @@ def login(response: Response, payload: LoginInput=Depends(LoginInput.as_form), d
         samesite="lax",      # Giảm nguy cơ tấn công CSRF
         secure=False
     )
-    return {"access_token": token["access_token"], "token_type": "bearer","user": token["data"]}
+    return {"access_token": token["access_token"], "token_type": "bearer","user":token["data"]}
 
 @router.post("/refresh")
 async def refresh(request:Request, response:Response):

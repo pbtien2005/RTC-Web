@@ -1,4 +1,4 @@
-import { store } from "../ws/store.js";
+import { store } from "../../frontend/src/ws/store.js";
 import {
   createPeer,
   setIceHandler,
@@ -7,13 +7,13 @@ import {
   onRemoteTrack,
   makeOffer,
   closePeer,
-} from "./peerConnection.js";
+} from "../../frontend/src/videoCall/peerConnection.js";
 import {
   bindLocalStream,
   bindRemoteStream,
   setCallState,
-} from "../../../templates/rtc/call.view.js";
-import { sendWS } from "../ws/socket.js";
+} from "./call.view.js";
+import { sendWS } from "../../frontend/src/ws/socket.js";
 
 let currentTarget = null;
 
