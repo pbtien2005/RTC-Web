@@ -1,6 +1,7 @@
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
+from sqlalchemy import create_engine
 from sqlalchemy import pool
 from core.config import settings
 from core.db import Base
@@ -9,6 +10,7 @@ from models.user import User
 from models.conversation_state import ConversationState
 from models.conversations import Conversation
 from models.user_certificates import UserCertificate
+from models.booking_requests import BookingRequest
 
 from models.messages import Message
 # this is the Alembic Config object, which provides
@@ -63,11 +65,7 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    connectable = create_engine(settings.DB_URL)
 
     with connectable.connect() as connection:
         context.configure(

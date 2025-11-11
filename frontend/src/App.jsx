@@ -6,6 +6,13 @@ import Home from "./page/Home";
 import AppLayout from "./AppLayout";
 import { Message } from "./page/message";
 import ProtectedRoute from "./components/ProtectedRoute";
+
+import AdminLayout from "./components/admin/AdminLayout";
+import DashboardPage from "./components/admin/DashboardPage";
+import StudentListPage from "./components/admin/StudentListPage";
+import CoacherListPage from "./components/admin/CoacherListPage";
+import AdminProtectedRoute from "./components/admin/AdminProtectedRoute";
+
 function App() {
   return (
     <BrowserRouter>
@@ -19,6 +26,19 @@ function App() {
         >
           <Route path="/" element={<Home />} />
           <Route path="/message" element={<Message />} />
+        </Route>
+
+        <Route
+          element={
+            <AdminProtectedRoute>
+              <AdminLayout />
+            </AdminProtectedRoute>
+          }
+        >
+          <Route path="/admin" element={<DashboardPage />} />
+          <Route path="/admin/dashboard" element={<DashboardPage />} />
+          <Route path="/admin/students" element={<StudentListPage />} />
+          <Route path="/admin/coachers" element={<CoacherListPage />} />
         </Route>
 
         <Route path="/register" element={<RegisterForm />} />

@@ -44,6 +44,11 @@ class User(Base):
     avatar_url: Mapped[str ] = mapped_column(String(2000),default="https://kenh14cdn.com/203336854389633024/2025/9/29/55608936113720574976099734364295725483729360n-1759142829408-17591428300561251128220.jpg")
     phone: Mapped[str | None] = mapped_column(String(32))
     job: Mapped[str | None] = mapped_column(String(255))
+    
+    # --- THÊM MỚI ---
+    university: Mapped[str | None] = mapped_column(String(255))
+    # ------------------
+    
     # các field tuỳ sơ đồ của bạn (site, city, etc.)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
@@ -105,7 +110,7 @@ class Student(Base):
         ForeignKey("users.user_id", ondelete="CASCADE"), primary_key=True
     )
     goal: Mapped[str | None] = mapped_column(String(255))
-    slot_quota: Mapped[int] = mapped_column(Integer, default=0)   # tổng slot được đăng ký
+    slot_quota: Mapped[int] = mapped_column(Integer, default=0)    # tổng slot được đăng ký
     slot_used: Mapped[int] = mapped_column(Integer, default=0)    # đã dùng
 
     __table_args__ = (
@@ -124,5 +129,3 @@ class Admin(Base):
     )
 
     user: Mapped[User] = relationship(back_populates="admin")
-
-

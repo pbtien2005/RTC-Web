@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { NavigationBar } from "../components/Navigation/NavigationBar";
+import { useNavigate } from "react-router-dom";
 export function LoginForm() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -29,7 +31,11 @@ export function LoginForm() {
       localStorage.setItem("user", JSON.stringify(result.user));
 
       setMessage("Đăng nhập thành công cho ${result.username} ");
-      window.location.href = "/";
+      if (result.user.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/");
+      }
       console.log(result.user);
     } catch (err) {
       console.error(err);
