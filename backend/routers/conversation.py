@@ -7,6 +7,8 @@ from services.conversation_service import ConversationService
 from schemas.conversation_schema import MessageListResponse,MessageResponse,MessageInput,MessageOutput
 from services.message_service import MessageService
 from repositories.user_repo import User
+from ws.routes import wsManager
+
 
 router=APIRouter(prefix="/conversation",tags=["conversations"])
 
@@ -62,7 +64,22 @@ async def send_message(
     payload: MessageInput = Body(...),
     db: Session=Depends(get_db)
     ):
-        service=MessageService(db)
-        res= await service.send_message(conversation_id,current_user.user_id,payload.content)
+        service1=MessageService(db)
+        res= await service1.send_message(conversation_id,current_user.user_id,payload.content)
+        service2=ConversationService(db)
+        remainer_id=service2.find_remainer_user_id(conversation_id,current_user.user_id)
+        data={
+            "type": "message.send",
+            "sender_id":current_user.user_id,
+            "receiver_id": remainer_id,
+            "data": {    
+                 "conversation_id":conversation_id,
+                 "message_id": res.id,
+                 "content": payload.content,
+                 "created_at": res.created_at.isoformat()
+            }
+        }
+        print("àddsafdsa")
+        await wsManager.send_1_to_1(data)
         return res
 

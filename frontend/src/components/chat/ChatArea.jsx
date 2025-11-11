@@ -9,6 +9,8 @@ export const ChatArea = ({
   onSend,
   onOpenSidebar,
   showMenuButton,
+  onCall,
+  onVideoCall,
 }) => {
   return (
     <div className="flex-1 flex flex-col">
@@ -16,6 +18,8 @@ export const ChatArea = ({
         conversation={conversation}
         onOpenSidebar={onOpenSidebar}
         showMenuButton={showMenuButton}
+        onCall={onCall}
+        onVideoCall={onVideoCall}
       />
       <MessagesArea messages={messages} />
       <MessageInput message={message} setMessage={setMessage} onSend={onSend} />

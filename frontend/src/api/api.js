@@ -15,8 +15,20 @@ export async function apiFetch(url, options = {}) {
       ...options,
       headers,
     });
-
-    if (!response.ok) {
+    if (response.status == 401) {
+      const refreshRes = await fetch("http://localhost:8000/auth/refresh", {
+        method: "POST",
+        credentials: "include",
+      });
+      const data = await refreshRes.json();
+      console.log(data);
+      localStorage.setItem("access_token", data.access_token);
+      response = await fetch("http://localhost:8000" + url, {
+        ...options,
+        Authorization: `Bearer ${data.access_token}`, // ✅
+        "Content-Type": "application/json",
+      });
+    } else if (!response.ok) {
       // Thử parse error message từ response body
       let errorData;
       try {

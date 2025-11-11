@@ -1,5 +1,5 @@
 import { store } from "../../frontend/src/ws/store.js";
-import { closePeer } from "./peerConnection.js";
+import { closePeer } from "../../frontend/src/videoCall/peerConnection.js";
 import { sendWS } from "../../frontend/src/ws/socket.js";
 
 let root = null;

@@ -34,3 +34,5 @@ class MessageOutput(BaseModel):
     content: str
     created_at: datetime
     edited_at: Optional[datetime]=None
+
+    model_config = { "from_attributes": True }

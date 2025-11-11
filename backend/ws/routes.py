@@ -12,29 +12,36 @@ from core.db import get_db
 ws_router=APIRouter()
 
         
-manager=ConnectionManager()
+wsManager=ConnectionManager()
 
 
-@ws_router.websocket("/ws/{token}")
-async def websocket_endpoint(websocket: WebSocket,token:str,db: Session=Depends(get_db)):
+@ws_router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket,db: Session=Depends(get_db)):
+    subprotocols = websocket.headers.get("sec-websocket-protocol")
+    token = subprotocols.split(",")[0].strip() if subprotocols else None
+    print(token)
+    await websocket.accept(subprotocol=token)
     user=get_current_user(token,db)
-    await manager.connect(websocket,user.user_id) #Nhan ket noi tu client
-    print("alo")
+    await wsManager.connect(websocket,str(user.user_id)) #Nhan ket noi tu client
+    print("alo") 
+    client_id=user.user_id   
+
     try:
         while True:
             data=await websocket.receive_text()
             try:
                 payload = json.loads(data)
             except json.JSONDecodeError:
-                payload = {"data": data}
-                await manager.send_personal_message(client_id, "invalid JSON", websocket)
+                payload = {"data": data}  
+                type=payload.get("type")
+                to_id=payload.get("to")   
+                data=payload.get("data")
+                await wsManager.send_personal_message(client_id, "invalid JSON", websocket)
                 continue
-            client_id=user.user_id
-            type=payload.get("type")
-            to_id=payload.get("to")   
-            data=payload.get("data")
+           
+         
 
-            await manager.send_1_to_1(type,client_id,to_id,data)
+            await wsManager.send_1_to_1(type,client_id,to_id,data)
 
             # if payload.get("type")=="message.send":
             #     if to_id is not None:
@@ -64,4 +71,4 @@ async def websocket_endpoint(websocket: WebSocket,token:str,db: Session=Depends(
 
     
     except WebSocketDisconnect:
-        await manager.disconnect(client_id)
+        await wsManager.disconnect(client_id)

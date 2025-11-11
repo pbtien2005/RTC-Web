@@ -7,17 +7,9 @@ class ConnectionManager:
         self.active_connections: dict[str,WebSocket]={}
     
     async def connect(self,websocket: WebSocket,id_client: str):
-        await websocket.accept()
         self.active_connections[id_client]=websocket
+        print(self.active_connections)
 
-        peers = [cid for cid in self.active_connections.keys() if cid != id_client]
-        await websocket.send_text(json.dumps({"type": "peers", "list": peers}))
-
-        # ✅ báo cho người khác là id_client vừa vào
-        join_msg = json.dumps({"type": "join", "id": id_client})
-        for cid, ws in self.active_connections.items():
-            if cid != id_client:
-                await ws.send_text(join_msg)
 
     
     async def disconnect(self,id_client: str):
@@ -42,11 +34,9 @@ class ConnectionManager:
                 continue  # tránh crash nếu WS đã đóng
 
 
-    async def send_1_to_1(self,type: str, sender_id: str, target_id: str, message: str):
+    async def send_1_to_1(self, payload):
         """Gửi riêng 1-1"""
-        ws = self.active_connections.get(target_id)
+        ws = self.active_connections.get(str(payload["receiver_id"])) 
+        print("đã gửi ",payload["receiver_id"],ws)
         if ws:
-            payload = {"type":type,"id": sender_id, "data": message}
             await ws.send_text(json.dumps(payload))
-
-manager=ConnectionManager()

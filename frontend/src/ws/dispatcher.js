@@ -1,7 +1,4 @@
 import { store } from "./store.js";
-import { appendIncoming } from "../../../templates/rtc/messages.view.js";
-import { upsertPeerAndRender } from "../../../templates/rtc/peers.view.js"; // thêm dòng này
-import { renderPeers } from "../../../templates/rtc/peers.view.js";
 import { showIncomingRequest } from "../../../templates/rtc/request.view.js";
 import { renderTarget } from "../../../templates/rtc/peers.view.js";
 import { sendWS } from "./socket.js";
@@ -11,46 +8,34 @@ import {
   applyAnswer,
   applyOfferAndMakeAnswer,
   createPeer,
-} from "../../../templates/rtc/peerConnection.js";
-import { startCall } from "../../../templates/rtc/call.controller.js";
-import { tryParseJSON } from "../../../templates/rtc/utils.js";
-import { closePeer } from "../../../templates/rtc/peerConnection.js";
+} from "../videoCall/peerConnection.js";
+import { startCall } from "../videoCall/call.controller.js";
+import { tryParseJSON } from "./utils.js";
+import { closePeer } from "../videoCall/peerConnection.js";
+
+let ui = {
+  addMessage: () => {},
+  showRequestModal: () => {}, // (meId, peerId, onAccept, onReject)
+  setCallState: () => {}, // "idle" | "connecting" | "in-call" | "ended"
+};
+
+export function registerUI(api) {
+  ui = { ...ui, ...api };
+}
 
 export async function handleIncoming(rawString) {
   let obj;
+  console.log("hello");
   obj = tryParseJSON(rawString);
-
-  // 🧩 1. Nếu là danh sách peers (server gửi khi có người mới vào)
-  if (obj.type === "peers" && Array.isArray(obj.list)) {
-    obj.list.forEach((id) => upsertPeerAndRender(id));
-    return; // không render tin nhắn
-  }
-
-  // 🧩 2. Nếu là join (một user mới vào)
-  if (obj.type === "join" && obj.id) {
-    upsertPeerAndRender(obj.id);
-    return;
-  }
-
-  // 🧩 3. Nếu là leave (user rời đi)
-  if (obj.type === "leave" && obj.id) {
-    // nếu có hàm removePeer thì gọi ở đây
-    console.log("User left:", obj.id);
-    store.deletePeer(obj.id);
-    store.clearTarget();
-    document.querySelector("#ws-target-id").textContent = "";
-    renderPeers();
-    return;
-  }
+  console.log("alo");
   if (obj.type == "connect.end") {
     store.clearTarget();
     document.querySelector("#ws-target-id").textContent = "";
   }
 
   // 🧩 4. Nếu là message chat thường
-  if (obj.type == "message.receive") {
-    console.log(rawString);
-    appendIncoming(rawString);
+  if (obj.type == "message.send") {
+    ui.addMessage(obj);
   }
   if (obj.type == "request.receive") {
     appendIncoming(rawString);

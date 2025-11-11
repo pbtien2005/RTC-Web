@@ -48,6 +48,12 @@ class ConversationRepository:
         
         return conversations
     
+    def find_remainer_id(self,conversation_id:int,current_id:int):
+            query = self.db.query(Conversation).filter(Conversation.conversation_id==conversation_id).first()
+            if current_id==query.user_a_id: return query.user_b_id
+            return query.user_a_id
+        
+    
     def count_by_user_id(self, user_id: int) -> int:
         """Đếm tổng số conversations của user"""
         return self.db.query(func.count(Conversation.conversation_id)).filter(

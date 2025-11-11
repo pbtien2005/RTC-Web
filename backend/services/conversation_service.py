@@ -74,6 +74,8 @@ class ConversationService:
         
         five_minutes_ago = datetime.utcnow() - timedelta(minutes=5)
         return last_login > five_minutes_ago
+    def find_remainer_user_id(self,conversation_id:int,user_id:int):
+        return self.conversation_repo.find_remainer_id(conversation_id,user_id)
     
     def check_user_access(self, conversation_id: int, user_id: int) -> bool:
         """Kiểm tra quyền truy cập"""

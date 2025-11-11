@@ -7,9 +7,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { connectWS, sendWS } from "./socket"; // <-- dùng util của bạn
-import { store } from "./store"; // <-- ví dụ: dispatch vào store
-import { handleIncoming } from "./dispatcher";
+import { connectWS, sendWS } from "./socket.js"; // <-- dùng util của bạn
+import { store } from "./store.js"; // <-- ví dụ: dispatch vào store
+import { handleIncoming } from "./dispatcher.js";
 
 export const WebSocketContext = createContext(null);
 export const useWS = () => useContext(WebSocketContext);

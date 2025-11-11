@@ -3,16 +3,16 @@ import { connectWS, sendWS } from "./socket.js";
 import { handleIncoming } from "./dispatcher.js";
 import { mountPeers } from "../../../templates/rtc/peers.view.js";
 import * as CallView from "../../../templates/rtc/call.view.js";
-import { startCall } from "../../../templates/rtc/call.controller.js";
+import { startCall } from "../videoCall/call.controller.js";
 import {
   applyOfferAndMakeAnswer,
   closePeer,
   toggleCam,
   toggleMic,
-} from "../../../templates/rtc/peerConnection.js";
-import { appendIncoming } from "../../../templates/rtc/messages.view.js";
+} from "../videoCall/peerConnection.js";
+import { appendIncoming } from "../videoCall/messages.view.js";
 import { setCallState } from "../../../templates/rtc/call.view.js";
-import { onDeviceChanged } from "../../../templates/rtc/call.controller.js";
+import { onDeviceChanged } from "../videoCall/call.controller.js";
 import { getCurrentUserId } from "../hook/GetCurrentUserId.jsx";
 
 const client_id = getCurrentUserId();

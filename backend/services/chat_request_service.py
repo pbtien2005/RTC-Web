@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from repositories.chat_request_repo import ChatRequestRepository
 from models.message_requests import MessageRequest, MessageRequestStatus
-from ws.routes import manager
+from ws.routes import wsManager
 
 
 

@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { apiFetch } from "../api/api";
 import { Sidebar } from "../components/Sidebar/Sidebar";
 import { ChatArea } from "../components/chat/ChatArea";
-import { data } from "react-router-dom";
+
 import { getCurrentUserId } from "../hook/GetCurrentUserId";
+import { registerUI } from "../ws/dispatcher.js";
 
 export function Message() {
   const [selectedChat, setSelectedChat] = useState(null);
@@ -13,6 +14,98 @@ export function Message() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Sử dụng ref để lưu giá trị mới nhất
+  const selectedChatRef = useRef(selectedChat);
+  const conversationsRef = useRef(conversations);
+
+  // Cập nhật ref mỗi khi state thay đổi
+  useEffect(() => {
+    selectedChatRef.current = selectedChat;
+  }, [selectedChat]);
+
+  useEffect(() => {
+    conversationsRef.current = conversations;
+  }, [conversations]);
+
+  // Đăng ký WebSocket handler
+  useEffect(() => {
+    const handlers = {
+      addMessage: (msg) => {
+        try {
+          console.log("Received message from WebSocket:", msg);
+          console.log(typeof msg);
+          const currentConvId =
+            conversationsRef.current[selectedChatRef.current]?.id;
+          const currentUserId = getCurrentUserId();
+
+          // Kiểm tra cấu trúc message
+          if (!msg || !msg.data || !msg.data.conversation_id) {
+            console.warn("Invalid message structure:", msg);
+            return;
+          }
+
+          const messageData = msg.data;
+          const senderId = msg.sender_id || msg.id; // sender_id từ root level của msg
+
+          console.log("Processing message:", {
+            currentConvId,
+            messageConvId: messageData.conversation_id,
+            senderId,
+            currentUserId,
+            match: messageData.conversation_id === currentConvId,
+          });
+
+          // Nếu tin nhắn thuộc cuộc chat đang mở → thêm vào messages
+          if (messageData.conversation_id === currentConvId) {
+            const newMessage = {
+              id: messageData.message_id || messageData.id,
+              sender: senderId === currentUserId ? "me" : "other",
+              text: messageData.content,
+              time: formatMessageTime(
+                messageData.created_at || new Date().toISOString()
+              ),
+            };
+
+            console.log("Adding message to chat:", newMessage);
+
+            setMessages((prev) => [...prev, newMessage]);
+          } else {
+            // Nếu tin nhắn thuộc cuộc chat khác → tăng unread count
+            console.log(
+              "Updating unread count for conversation:",
+              messageData.conversation_id
+            );
+
+            setConversations((prev) => {
+              return prev.map((conv) => {
+                if (conv.id === messageData.conversation_id) {
+                  return {
+                    ...conv,
+                    lastMessage: messageData.content,
+                    unread: (conv.unread || 0) + 1,
+                    time: "Just now",
+                  };
+                }
+                return conv;
+              });
+            });
+          }
+        } catch (error) {
+          console.error("Error in addMessage handler:", error);
+        }
+      },
+    };
+
+    // Đăng ký handlers
+    registerUI(handlers);
+
+    // Cleanup function
+    return () => {
+      // Nếu có unregister function thì gọi ở đây
+      // unregisterUI();
+    };
+  }, []); // Empty dependency array - chỉ đăng ký 1 lần
 
   // Fetch danh sách conversations
   useEffect(() => {
@@ -37,8 +130,7 @@ export function Message() {
               conv.participant.avatar ||
               `https://api.dicebear.com/7.x/avataaars/svg?seed=${conv.participant.name}`,
             lastMessage: conv.lastMessage?.content || "No messages yet",
-            // time: formatTime(conv.updatedAt),
-            unread: conv.unreadCount,
+            unread: conv.unreadCount || 0,
             online: conv.participant.isOnline,
           }));
 
@@ -87,7 +179,7 @@ export function Message() {
                 `https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.sender.username}`,
               edited_at: msg.edited_at,
             }));
-            console.log(transformedMessages);
+
             setMessages(transformedMessages);
           }
         } catch (err) {
@@ -98,33 +190,6 @@ export function Message() {
       fetchMessages();
     }
   }, [selectedChat, conversations]);
-
-  // Helper function to format time
-  const formatTime = (timestamp) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diff = now - date;
-
-    // Less than 1 hour
-    if (diff < 3600000) {
-      const minutes = Math.floor(diff / 60000);
-      return `${minutes}m ago`;
-    }
-    // Less than 1 day
-    else if (diff < 86400000) {
-      const hours = Math.floor(diff / 3600000);
-      return `${hours}h ago`;
-    }
-    // Less than 7 days
-    else if (diff < 604800000) {
-      const days = Math.floor(diff / 86400000);
-      return `${days}d ago`;
-    }
-    // More than 7 days
-    else {
-      return date.toLocaleDateString();
-    }
-  };
 
   // Helper function to format message time
   const formatMessageTime = (timestamp) => {
@@ -148,27 +213,29 @@ export function Message() {
           }),
         });
 
-        if (res.success) {
-          // Add new message to messages array
+        if (res.ok) {
+          const data = await res.json();
           const newMessage = {
-            id: res.data.id,
+            id: data.id,
             sender: "me",
-            text: res.data.content,
-            time: formatMessageTime(res.data.created_at),
-            edited_at: res.data.edited_at,
+            text: data.content,
+            time: formatMessageTime(data.created_at),
+            edited_at: data.edited_at,
           };
 
           setMessages((prev) => [...prev, newMessage]);
           setMessage("");
 
           // Update last message in conversations list
-          const updatedConversations = [...conversations];
-          updatedConversations[selectedChat] = {
-            ...updatedConversations[selectedChat],
-            lastMessage: message.trim(),
-            time: "Just now",
-          };
-          setConversations(updatedConversations);
+          setConversations((prev) => {
+            const updated = [...prev];
+            updated[selectedChat] = {
+              ...updated[selectedChat],
+              lastMessage: message.trim(),
+              time: "Just now",
+            };
+            return updated;
+          });
         }
       } catch (err) {
         console.error("Error sending message:", err);
@@ -179,12 +246,14 @@ export function Message() {
   const handleSelectChat = (index) => {
     setSelectedChat(index);
     // Clear unread count when selecting chat
-    const updatedConversations = [...conversations];
-    updatedConversations[index] = {
-      ...updatedConversations[index],
-      unread: 0,
-    };
-    setConversations(updatedConversations);
+    setConversations((prev) => {
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index],
+        unread: 0,
+      };
+      return updated;
+    });
   };
 
   // Loading state
@@ -215,7 +284,16 @@ export function Message() {
       </div>
     );
   }
-
+  const oncall = () => {};
+  const onVideoCall = async () => {
+    if (selectedChat !== null) {
+      const conversation = conversations[selectedChat];
+      await initiateCall(conversation.id, {
+        name: conversation.name,
+        avatar: conversation.avatar,
+      });
+    }
+  };
   // Empty state
   if (conversations.length === 0) {
     return (
@@ -249,6 +327,8 @@ export function Message() {
         onSend={handleSendMessage}
         onOpenSidebar={() => setSidebarOpen(true)}
         showMenuButton={!sidebarOpen}
+        onCall={onCall}
+        onVideoCall={onVideoCall}
       />
     </div>
   );

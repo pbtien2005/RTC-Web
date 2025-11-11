@@ -8,10 +8,10 @@ import { Message } from "./page/Message";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotificationsPage from "./page/NotificationsPage";
 import WebSocketProvider from "./ws/WebSocketProvider";
-
+import { VideoCallProvider } from "./videoCall/VideoCallContext";
+import { ws } from "./ws/socket";
 function App() {
-  const token = localStorage.getItem("access_token");
-  const wsUrl = `ws://localhost:8000/ws/${token}`;
+  const wsUrl = `ws://localhost:8000/ws`;
   return (
     <BrowserRouter>
       <Routes>
@@ -19,7 +19,9 @@ function App() {
           element={
             <ProtectedRoute>
               <WebSocketProvider wsUrl={wsUrl}>
-                <AppLayout />
+                <VideoCallProvider ws={ws}>
+                  <AppLayout />
+                </VideoCallProvider>
               </WebSocketProvider>
             </ProtectedRoute>
           }

@@ -1,4 +1,4 @@
-import { setCallState } from "./call.view.js";
+import { setCallState } from "../../../templates/rtc/call.view.js";
 
 let pc;
 let localSTream;
