@@ -30,8 +30,8 @@ export const ActiveFriends = ({ conversations }) => {
             <div className="relative">
               <div className="w-14 h-14 rounded-full bg-gradient-to-tr  from-[#E90000] to-[#FAA6FF] p-0.5">
                 <img
-                  src={friend.avatar}
-                  alt={friend.name}
+                  src={friend.avatar_url}
+                  alt={friend.username}
                   className="w-full h-full rounded-full border-2 border-white"
                 />
               </div>

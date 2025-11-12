@@ -83,6 +83,7 @@ class ConversationRepository:
             conversation.last_message_at = timestamp
             self.db.commit()
 
+
     def update_last_message(
         self,
         conversation_id: int,
@@ -93,16 +94,14 @@ class ConversationRepository:
         Cập nhật last_message_id và last_message_at cho conversation.
         Ghi đè không kiểm tra thứ tự thời gian.
         """
-        stmt = (
-            update(Conversation)
-            .where(Conversation.conversation_id == conversation_id)
-            .values(
-                last_message_id=message_id,
-                last_message_at=message_created_at if message_created_at else func.now(),
-            )
-            .execution_options(synchronize_session=False)
-        )
-        self.db.execute(stmt)
+        print("đã update last message")
+        conv = self.db.get(Conversation, conversation_id)
+        if not conv:
+            return  # hoặc raise 404
+
+        conv.last_message_id = message_id
+        conv.last_message_at = message_created_at or datetime.utcnow()  # hoặc datetime.now(timezone.utc)
+        self.db.commit()
     
     def check_user_access(self, conversation_id: int, user_id: int) -> bool:
         """Kiểm tra user có quyền truy cập conversation không"""

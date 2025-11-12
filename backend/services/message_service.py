@@ -6,11 +6,13 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 from repositories.conversation_repo import ConversationRepository
 from models.messages import Message
+from repositories.conversation_state_repo import ConversationStateRepository
 class MessageService:
     def __init__(self, db: Session):
         self.db = db
         self.message_repo = MessageRepository(db)
         self.conversation_repo=ConversationRepository(db)
+        self.conversation_state_repo=ConversationStateRepository(db)
     
     def get_conversation_messages(
         self, 
@@ -27,6 +29,7 @@ class MessageService:
         #                         detail="You don't have access to this conversation")
         
         before_timestamp: datetime | None = None
+        
 
         # Lấy limit + 1 để biết còn nữa hay không
         raw_messages = self.message_repo.find_by_conversation_id(
@@ -35,10 +38,14 @@ class MessageService:
             before=before_timestamp
         )
 
+        conv=self.conversation_repo.find_by_id(conversation_id)
+
+        self.conversation_state_repo.create(conversation_id,current_user_id,conv.last_message_id)
+
         has_more = len(raw_messages) > limit
         if has_more:
             raw_messages = raw_messages[:limit]
-
+        
         # Map sang schema
         message_responses: List[MessageResponse] = [
             MessageResponse(

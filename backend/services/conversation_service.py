@@ -33,8 +33,6 @@ class ConversationService:
                 conv.conversation_id, 
                 user_id
             )
-            
-            # Kiểm tra online status
 
             
             enriched_conversations.append({

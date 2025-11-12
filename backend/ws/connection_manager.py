@@ -34,7 +34,7 @@ class ConnectionManager:
             "sender_id": id_client,
         }
         for ws in self.active_connections.values():
-            await ws.send_text(payload)
+            await ws.send_text(json.dumps(payload))
     
     async def send_personal_message(self, payload,websocket: WebSocket):
         """Gửi lại cho chính client (echo)"""

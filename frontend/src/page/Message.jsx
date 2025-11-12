@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { apiFetch } from "../api/api";
+import { apiFetch } from "../api/api.js";
 import { Sidebar } from "../components/Sidebar/Sidebar";
 import { ChatArea } from "../components/chat/ChatArea";
 
@@ -20,6 +20,107 @@ export function Message() {
   const [error, setError] = useState(null);
   const { requestCall } = useVideoCall();
 
+  // Đăng ký WebSocket handler
+  const handlersRef = useRef();
+  handlersRef.current = {
+    addMessage: (msg) => {
+      try {
+        console.log("Received message from WebSocket:", msg);
+        const currentReceiverId = selectedChatRef.current;
+        const currentConversation =
+          conversationsMapRef.current[currentReceiverId];
+        const currentUserId = getCurrentUserId();
+
+        if (!msg || !msg.data || !msg.data.conversation_id) {
+          console.warn("Invalid message structure:", msg);
+          return;
+        }
+
+        const messageData = msg.data;
+        const senderId = msg.sender_id;
+
+        console.log("Processing message:", {
+          currentConvId: currentConversation?.id,
+          messageConvId: messageData.conversation_id,
+          senderId,
+          currentUserId,
+        });
+
+        if (
+          currentConversation &&
+          messageData.conversation_id === currentConversation.id
+        ) {
+          const newMessage = {
+            id: messageData.message_id || messageData.id,
+            sender: senderId === currentUserId ? "me" : "other",
+            text: messageData.content,
+            time: formatMessageTime(
+              messageData.created_at || new Date().toISOString()
+            ),
+          };
+
+          console.log("Adding message to chat:", newMessage);
+          setMessages((prev) => [...prev, newMessage]);
+        } else {
+          console.log(
+            "Updating unread count for conversation:",
+            messageData.conversation_id
+          );
+
+          setConversationsMap((prev) => {
+            const updated = { ...prev };
+            Object.keys(updated).forEach((receiverId) => {
+              if (updated[receiverId].id === messageData.conversation_id) {
+                updated[receiverId] = {
+                  ...updated[receiverId],
+                  lastMessage: messageData.content,
+                  unread: (updated[receiverId].unread || 0) + 1,
+                  time: "Just now",
+                };
+              }
+            });
+            return updated;
+          });
+        }
+      } catch (error) {
+        console.error("Error in addMessage handler:", error);
+      }
+    },
+
+    userStatusUpdate: (userId, isOnline) => {
+      console.log("al0 - Handler được gọi!");
+      try {
+        console.log(`User ${userId} is now ${isOnline ? "online" : "offline"}`);
+
+        setConversationsMap((prev) => {
+          const updated = { ...prev };
+          console.log("alo - Đang update conversationsMap");
+          console.log("Current conversationsMap:", prev);
+          console.log("Looking for userId:", userId);
+
+          if (updated[userId]) {
+            updated[userId] = {
+              ...updated[userId],
+              online: isOnline,
+            };
+            console.log(
+              `Updated online status for receiver_id ${userId}:`,
+              isOnline
+            );
+          } else {
+            console.log(`⚠️ User ${userId} not found in conversationsMap`);
+            console.log("Available keys:", Object.keys(updated));
+          }
+
+          return updated;
+        });
+      } catch (error) {
+        console.error("Error in userOnline handler:", error);
+      }
+    },
+  };
+  registerUI(handlersRef.current);
+
   // Sử dụng ref để lưu giá trị mới nhất
   const selectedChatRef = useRef(selectedChat);
   const conversationsMapRef = useRef(conversationsMap);
@@ -33,120 +134,24 @@ export function Message() {
     conversationsMapRef.current = conversationsMap;
   }, [conversationsMap]);
 
-  // Đăng ký WebSocket handler
+  // Đăng ký handlers
   useEffect(() => {
-    const handlers = {
-      addMessage: (msg) => {
-        try {
-          console.log("Received message from WebSocket:", msg);
-          const currentReceiverId = selectedChatRef.current;
-          const currentConversation =
-            conversationsMapRef.current[currentReceiverId];
-          const currentUserId = getCurrentUserId();
-
-          // Kiểm tra cấu trúc message
-          if (!msg || !msg.data || !msg.data.conversation_id) {
-            console.warn("Invalid message structure:", msg);
-            return;
-          }
-
-          const messageData = msg.data;
-          const senderId = msg.sender_id;
-
-          console.log("Processing message:", {
-            currentConvId: currentConversation?.id,
-            messageConvId: messageData.conversation_id,
-            senderId,
-            currentUserId,
-          });
-
-          // Nếu tin nhắn thuộc cuộc chat đang mở → thêm vào messages
-          if (
-            currentConversation &&
-            messageData.conversation_id === currentConversation.id
-          ) {
-            const newMessage = {
-              id: messageData.message_id || messageData.id,
-              sender: senderId === currentUserId ? "me" : "other",
-              text: messageData.content,
-              time: formatMessageTime(
-                messageData.created_at || new Date().toISOString()
-              ),
-            };
-
-            console.log("Adding message to chat:", newMessage);
-            setMessages((prev) => [...prev, newMessage]);
-          } else {
-            // Nếu tin nhắn thuộc cuộc chat khác → tăng unread count
-            console.log(
-              "Updating unread count for conversation:",
-              messageData.conversation_id
-            );
-
-            setConversationsMap((prev) => {
-              const updated = { ...prev };
-              // Tìm conversation theo conversation_id
-              Object.keys(updated).forEach((receiverId) => {
-                if (updated[receiverId].id === messageData.conversation_id) {
-                  updated[receiverId] = {
-                    ...updated[receiverId],
-                    lastMessage: messageData.content,
-                    unread: (updated[receiverId].unread || 0) + 1,
-                    time: "Just now",
-                  };
-                }
-              });
-              return updated;
-            });
-          }
-        } catch (error) {
-          console.error("Error in addMessage handler:", error);
-        }
-      },
-
-      // Handler cho userOnline event
-      userStatusUpdate: (userId, isOnline) => {
-        try {
-          console.log("Received userOnline event:");
-
-          console.log(
-            `User ${userId} is now ${isOnline ? "online" : "offline"}`
-          );
-
-          // Cập nhật trạng thái online của user trong conversationsMap
-          setConversationsMap((prev) => {
-            const updated = { ...prev };
-
-            // Tìm conversation có receiver_id trùng với userId
-            if (updated[userId]) {
-              updated[userId] = {
-                ...updated[userId],
-                online: isOnline,
-              };
-              console.log(
-                `Updated online status for receiver_id ${userId}:`,
-                isOnline
-              );
-            }
-
-            return updated;
-          });
-        } catch (error) {
-          console.error("Error in userOnline handler:", error);
-        }
-      },
+    // Tạo wrapper để luôn gọi handler mới nhất từ ref
+    const wrappedHandlers = {
+      addMessage: (msg) => handlersRef.current.addMessage(msg),
+      userStatusUpdate: (userId, isOnline) =>
+        handlersRef.current.userStatusUpdate(userId, isOnline),
     };
 
-    // Đăng ký handlers
-    registerUI(handlers);
+    console.log("🔌 Registering WebSocket handlers");
+    registerUI(wrappedHandlers);
 
-    // Cleanup function
+    // Cleanup nếu cần
     return () => {
-      // Nếu có unregister function thì gọi ở đây
-      // unregisterUI();
+      console.log("🔌 Unregistering WebSocket handlers");
+      // registerUI(null); // nếu dispatcher có hỗ trợ cleanup
     };
-  }, []); // Empty dependency array - chỉ đăng ký 1 lần
-
+  }, []);
   // Fetch danh sách conversations
   useEffect(() => {
     const fetchConversations = async () => {
@@ -180,7 +185,6 @@ export function Message() {
             };
           });
 
-          console.log("Conversations map:", conversationsMapping);
           setConversationsMap(conversationsMapping);
 
           // Auto select first conversation

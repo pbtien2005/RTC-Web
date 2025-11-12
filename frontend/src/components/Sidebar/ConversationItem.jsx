@@ -8,8 +8,8 @@ export const ConversationItem = ({ conversation, isSelected, onClick }) => {
     >
       <div className="relative">
         <img
-          src={conversation.avatar}
-          alt={conversation.name}
+          src={conversation.avatar_url}
+          alt={conversation.username}
           className="w-12 h-12 rounded-full"
         />
         {conversation.online && (

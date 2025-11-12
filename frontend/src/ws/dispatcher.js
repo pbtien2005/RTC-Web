@@ -15,26 +15,64 @@ let ui = {
   endCall: () => {},
   pendingCallRef: "",
 };
+let messageQueue = [];
+let isUIReady = false;
 
 export function registerUI(api) {
-  ui = { ...ui, ...api };
-}
+  console.log("🔧 Registering UI handlers");
 
+  Object.keys(api).forEach((key) => {
+    ui[key] = api[key];
+    console.log(`✅ Registered ui.${key}`);
+  });
+
+  isUIReady = true;
+  console.log("🔧 Final ui:", Object.keys(ui));
+
+  // Xử lý các messages trong queue
+  if (messageQueue.length > 0) {
+    console.log(`📦 Processing ${messageQueue.length} queued messages`);
+    messageQueue.forEach((queuedMessage) => {
+      handleIncoming(queuedMessage);
+    });
+    messageQueue = [];
+  }
+}
 export async function handleIncoming(rawString) {
+  if (!isUIReady) {
+    console.log("⏳ UI not ready, queueing message");
+    messageQueue.push(rawString);
+    return;
+  }
   let obj;
   obj = tryParseJSON(rawString);
 
   // 🧩 4. Nếu là message chat thường
   if (obj.type == "user.online") {
     ui.userStatusUpdate(obj.sender_id, true);
+    console.log(typeof obj.sender_id);
   }
   if (obj.type == "user.online_list") {
-    console.log("allafds");
-    for (const i of obj.data) {
-      ui.userStatusUpdate(i, true);
+    const ids = obj.data.map(String);
+    console.log("Received online users:", ids);
+    console.log("typeof ui.userStatusUpdate =", typeof ui?.userStatusUpdate);
+    console.log("Function content:", ui.userStatusUpdate.toString());
+    // Check ui và userStatusUpdate có tồn tại không
+    for (const uidStr of ids) {
+      console.log("Updating status for user:", uidStr);
+      console.log("Calling ui.userStatusUpdate with:", uidStr, true);
+
+      try {
+        const result = ui.userStatusUpdate(uidStr, true);
+        console.log("Result:", result);
+      } catch (e) {
+        console.error("Error calling userStatusUpdate:", e);
+      }
     }
   }
+
   if (obj.type == "user.offline") {
+    console.log("đã nhận user.offline");
     ui.userStatusUpdate(obj.sender_id, false);
   }
   if (obj.type == "message.send") {
