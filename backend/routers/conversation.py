@@ -79,7 +79,6 @@ async def send_message(
                  "created_at": res.created_at.isoformat()
             }
         }
-        print("àddsafdsa")
         await wsManager.send_1_to_1(data)
         return res
 

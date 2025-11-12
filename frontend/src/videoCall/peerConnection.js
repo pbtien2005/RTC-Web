@@ -1,5 +1,3 @@
-import { setCallState } from "../../../templates/rtc/call.view.js";
-
 let pc;
 let localSTream;
 let iceCandidateQueue = [];

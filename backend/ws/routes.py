@@ -19,12 +19,14 @@ wsManager=ConnectionManager()
 async def websocket_endpoint(websocket: WebSocket,db: Session=Depends(get_db)):
     subprotocols = websocket.headers.get("sec-websocket-protocol")
     token = subprotocols.split(",")[0].strip() if subprotocols else None
-    print(token)
     await websocket.accept(subprotocol=token)
     user=get_current_user(token,db)
-    await wsManager.connect(websocket,str(user.user_id)) #Nhan ket noi tu client
-    print("alo") 
-    client_id=user.user_id   
+    client_id=user.user_id  
+    await wsManager.connect(websocket,str(user.user_id)) #Nhan ket noi tu client 
+
+
+
+
 
     try:
         while True:

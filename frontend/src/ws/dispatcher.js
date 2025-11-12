@@ -7,6 +7,7 @@ import {
 import { tryParseJSON } from "./utils.js";
 let ui = {
   addMessage: () => {},
+  userStatusUpdate: () => {},
   handleCallAccepted: () => {},
   setCallState: (e) => {},
   setIncomingCall: (e) => {},
@@ -24,6 +25,18 @@ export async function handleIncoming(rawString) {
   obj = tryParseJSON(rawString);
 
   // 🧩 4. Nếu là message chat thường
+  if (obj.type == "user.online") {
+    ui.userStatusUpdate(obj.sender_id, true);
+  }
+  if (obj.type == "user.online_list") {
+    console.log("allafds");
+    for (const i of obj.data) {
+      ui.userStatusUpdate(i, true);
+    }
+  }
+  if (obj.type == "user.offline") {
+    ui.userStatusUpdate(obj.sender_id, false);
+  }
   if (obj.type == "message.send") {
     ui.addMessage(obj);
   }

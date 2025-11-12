@@ -6,18 +6,23 @@ import { ChatArea } from "../components/chat/ChatArea";
 import { getCurrentUserId } from "../hook/GetCurrentUserId";
 import { registerUI } from "../ws/dispatcher.js";
 import { useVideoCall } from "../videoCall/VideoCallContext.jsx";
+
 export function Message() {
   const [selectedChat, setSelectedChat] = useState(null);
   const [message, setMessage] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [conversations, setConversations] = useState([]);
+
+  // Thay đổi: Lưu conversations theo mapping receiver_id -> conversation
+  const [conversationsMap, setConversationsMap] = useState({});
+
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { requestCall } = useVideoCall();
+
   // Sử dụng ref để lưu giá trị mới nhất
   const selectedChatRef = useRef(selectedChat);
-  const conversationsRef = useRef(conversations);
+  const conversationsMapRef = useRef(conversationsMap);
 
   // Cập nhật ref mỗi khi state thay đổi
   useEffect(() => {
@@ -25,8 +30,8 @@ export function Message() {
   }, [selectedChat]);
 
   useEffect(() => {
-    conversationsRef.current = conversations;
-  }, [conversations]);
+    conversationsMapRef.current = conversationsMap;
+  }, [conversationsMap]);
 
   // Đăng ký WebSocket handler
   useEffect(() => {
@@ -34,9 +39,9 @@ export function Message() {
       addMessage: (msg) => {
         try {
           console.log("Received message from WebSocket:", msg);
-          console.log(typeof msg);
-          const currentConvId =
-            conversationsRef.current[selectedChatRef.current]?.id;
+          const currentReceiverId = selectedChatRef.current;
+          const currentConversation =
+            conversationsMapRef.current[currentReceiverId];
           const currentUserId = getCurrentUserId();
 
           // Kiểm tra cấu trúc message
@@ -46,18 +51,20 @@ export function Message() {
           }
 
           const messageData = msg.data;
-          const senderId = msg.sender_id || msg.id; // sender_id từ root level của msg
+          const senderId = msg.sender_id;
 
           console.log("Processing message:", {
-            currentConvId,
+            currentConvId: currentConversation?.id,
             messageConvId: messageData.conversation_id,
             senderId,
             currentUserId,
-            match: messageData.conversation_id === currentConvId,
           });
 
           // Nếu tin nhắn thuộc cuộc chat đang mở → thêm vào messages
-          if (messageData.conversation_id === currentConvId) {
+          if (
+            currentConversation &&
+            messageData.conversation_id === currentConversation.id
+          ) {
             const newMessage = {
               id: messageData.message_id || messageData.id,
               sender: senderId === currentUserId ? "me" : "other",
@@ -68,7 +75,6 @@ export function Message() {
             };
 
             console.log("Adding message to chat:", newMessage);
-
             setMessages((prev) => [...prev, newMessage]);
           } else {
             // Nếu tin nhắn thuộc cuộc chat khác → tăng unread count
@@ -77,22 +83,56 @@ export function Message() {
               messageData.conversation_id
             );
 
-            setConversations((prev) => {
-              return prev.map((conv) => {
-                if (conv.id === messageData.conversation_id) {
-                  return {
-                    ...conv,
+            setConversationsMap((prev) => {
+              const updated = { ...prev };
+              // Tìm conversation theo conversation_id
+              Object.keys(updated).forEach((receiverId) => {
+                if (updated[receiverId].id === messageData.conversation_id) {
+                  updated[receiverId] = {
+                    ...updated[receiverId],
                     lastMessage: messageData.content,
-                    unread: (conv.unread || 0) + 1,
+                    unread: (updated[receiverId].unread || 0) + 1,
                     time: "Just now",
                   };
                 }
-                return conv;
               });
+              return updated;
             });
           }
         } catch (error) {
           console.error("Error in addMessage handler:", error);
+        }
+      },
+
+      // Handler cho userOnline event
+      userStatusUpdate: (userId, isOnline) => {
+        try {
+          console.log("Received userOnline event:");
+
+          console.log(
+            `User ${userId} is now ${isOnline ? "online" : "offline"}`
+          );
+
+          // Cập nhật trạng thái online của user trong conversationsMap
+          setConversationsMap((prev) => {
+            const updated = { ...prev };
+
+            // Tìm conversation có receiver_id trùng với userId
+            if (updated[userId]) {
+              updated[userId] = {
+                ...updated[userId],
+                online: isOnline,
+              };
+              console.log(
+                `Updated online status for receiver_id ${userId}:`,
+                isOnline
+              );
+            }
+
+            return updated;
+          });
+        } catch (error) {
+          console.error("Error in userOnline handler:", error);
         }
       },
     };
@@ -122,24 +162,31 @@ export function Message() {
           : [];
 
         if (list) {
-          // Transform API response to match component props
-          const transformedConversations = list.map((conv) => ({
-            id: conv.id,
-            receiver_id: conv.participant.id,
-            name: conv.participant.name,
-            avatar:
-              conv.participant.avatar ||
-              `https://api.dicebear.com/7.x/avataaars/svg?seed=${conv.participant.name}`,
-            lastMessage: conv.lastMessage?.content || "No messages yet",
-            unread: conv.unreadCount || 0,
-            online: conv.participant.isOnline,
-          }));
+          // Transform API response thành map với key là receiver_id
+          const conversationsMapping = {};
 
-          setConversations(transformedConversations);
+          list.forEach((conv) => {
+            const receiverId = conv.participant.id;
+            conversationsMapping[receiverId] = {
+              id: conv.id,
+              receiver_id: receiverId,
+              name: conv.participant.name,
+              avatar:
+                conv.participant.avatar ||
+                `https://api.dicebear.com/7.x/avataaars/svg?seed=${conv.participant.name}`,
+              lastMessage: conv.lastMessage?.content || "No messages yet",
+              unread: conv.unreadCount || 0,
+              online: conv.participant.isOnline,
+            };
+          });
+
+          console.log("Conversations map:", conversationsMapping);
+          setConversationsMap(conversationsMapping);
 
           // Auto select first conversation
-          if (transformedConversations.length > 0) {
-            setSelectedChat(0);
+          const firstReceiverId = Object.keys(conversationsMapping)[0];
+          if (firstReceiverId) {
+            setSelectedChat(firstReceiverId);
           }
         }
       } catch (err) {
@@ -155,10 +202,10 @@ export function Message() {
 
   // Fetch messages khi chọn conversation
   useEffect(() => {
-    if (selectedChat !== null && conversations[selectedChat]) {
+    if (selectedChat !== null && conversationsMap[selectedChat]) {
       const fetchMessages = async () => {
         try {
-          const conversationId = conversations[selectedChat].id;
+          const conversationId = conversationsMap[selectedChat].id;
           const res = await apiFetch(
             `/conversation/${conversationId}/messages`,
             {
@@ -190,7 +237,7 @@ export function Message() {
 
       fetchMessages();
     }
-  }, [selectedChat, conversations]);
+  }, [selectedChat, conversationsMap]);
 
   // Helper function to format message time
   const formatMessageTime = (timestamp) => {
@@ -205,7 +252,7 @@ export function Message() {
   const handleSendMessage = async () => {
     if (message.trim() && selectedChat !== null) {
       try {
-        const conversationId = conversations[selectedChat].id;
+        const conversationId = conversationsMap[selectedChat].id;
 
         const res = await apiFetch(`/conversation/${conversationId}/messages`, {
           method: "POST",
@@ -227,16 +274,15 @@ export function Message() {
           setMessages((prev) => [...prev, newMessage]);
           setMessage("");
 
-          // Update last message in conversations list
-          setConversations((prev) => {
-            const updated = [...prev];
-            updated[selectedChat] = {
-              ...updated[selectedChat],
+          // Update last message in conversations map
+          setConversationsMap((prev) => ({
+            ...prev,
+            [selectedChat]: {
+              ...prev[selectedChat],
               lastMessage: message.trim(),
               time: "Just now",
-            };
-            return updated;
-          });
+            },
+          }));
         }
       } catch (err) {
         console.error("Error sending message:", err);
@@ -244,17 +290,16 @@ export function Message() {
     }
   };
 
-  const handleSelectChat = (index) => {
-    setSelectedChat(index);
+  const handleSelectChat = (receiverId) => {
+    setSelectedChat(receiverId);
     // Clear unread count when selecting chat
-    setConversations((prev) => {
-      const updated = [...prev];
-      updated[index] = {
-        ...updated[index],
+    setConversationsMap((prev) => ({
+      ...prev,
+      [receiverId]: {
+        ...prev[receiverId],
         unread: 0,
-      };
-      return updated;
-    });
+      },
+    }));
   };
 
   // Loading state
@@ -285,13 +330,14 @@ export function Message() {
       </div>
     );
   }
+
   const onCall = () => {
     return;
   };
 
   const onVideoCall = async () => {
     if (selectedChat !== null) {
-      const conversation = conversations[selectedChat];
+      const conversation = conversationsMap[selectedChat];
       const raw = localStorage.getItem("user");
       const user = raw ? JSON.parse(raw) : null;
 
@@ -319,8 +365,9 @@ export function Message() {
       }
     }
   };
+
   // Empty state
-  if (conversations.length === 0) {
+  if (Object.keys(conversationsMap).length === 0) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-100">
         <div className="text-center">
@@ -333,18 +380,21 @@ export function Message() {
     );
   }
 
+  // Convert map to array for Sidebar
+  const conversationsArray = Object.values(conversationsMap);
+
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden">
       <Sidebar
         isOpen={sidebarOpen}
-        conversations={conversations}
+        conversations={conversationsArray}
         selectedChat={selectedChat}
         onSelectChat={handleSelectChat}
         onClose={() => setSidebarOpen(false)}
       />
       <ChatArea
         conversation={
-          selectedChat !== null ? conversations[selectedChat] : null
+          selectedChat !== null ? conversationsMap[selectedChat] : null
         }
         messages={messages}
         message={message}

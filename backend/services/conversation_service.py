@@ -35,7 +35,7 @@ class ConversationService:
             )
             
             # Kiểm tra online status
-            is_online = await self._check_user_online(participant_id)
+
             
             enriched_conversations.append({
                 'id': conv.conversation_id,
@@ -43,7 +43,7 @@ class ConversationService:
                     'id': participant.user_id,
                     'name': participant.username or participant.email.split('@')[0],
                     'avatar': participant.avatar_url,
-                    'isOnline': is_online
+                    'isOnline': False
                 },
                 'lastMessage': {
                     'id': last_message.id,

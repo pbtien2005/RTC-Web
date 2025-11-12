@@ -24,7 +24,11 @@ export const ChatHeader = ({
         />
         <div className="ml-3">
           <h2 className="font-semibold text-gray-900">{conversation.name}</h2>
-          <p className="text-xs text-green-500">
+          <p
+            className={`text-xs ${
+              conversation.online ? "text-green-500" : "text-red-500"
+            }`}
+          >
             {conversation.online ? "Online" : "Offline"}
           </p>
         </div>
