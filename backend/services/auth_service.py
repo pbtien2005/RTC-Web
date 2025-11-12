@@ -1,4 +1,5 @@
 from datetime import timedelta
+from auth.dependencies import create_access_token, create_refresh_token, decode_token
 from repositories.user_repo import UserRepository
 from schemas.auth_schema import RegisterInput
 from fastapi import HTTPException, status
@@ -41,10 +42,33 @@ class AuthService:
                 detail="Wrong password!",
             )
         access_token_expires=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token=create_token(data={"sub":user.user_id, "email":user.email,"type":"access"},expires_delta=access_token_expires)
+        access_token=create_token(data={"sub":str(user.user_id), "email":user.email,"type":"access"},expires_delta=access_token_expires)
 
         refesh_token_exprires=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
-        refresh_token=create_token(data={"sub":user.user_id,"email":user.email,"type":"refresh"},expires_delta=refesh_token_exprires)
+        refresh_token=create_token(data={"sub":str(user.user_id),"email":user.email,"type":"refresh"},expires_delta=refesh_token_exprires)
         return {"access_token":access_token,"refresh_token":refresh_token, "data": user}
         
-        
+async def rotate_refresh_and_issue_access(refresh_token: str):
+    if not refresh_token:
+        raise HTTPException(status_code=401, detail="Missing refresh token")
+
+    # 1) Giải mã & kiểm tra loại
+    try:
+        payload = decode_token(refresh_token)
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    if payload.get("type") != "refresh":
+        raise HTTPException(status_code=401, detail="Wrong token type")
+
+    user_id = payload.get("sub")
+    if not user_id :
+        raise HTTPException(status_code=401, detail="Invalid token payload")
+
+
+    new_access = create_access_token(sub=user_id)
+
+    # 4) Xoay vòng refresh (khuyến nghị)
+    new_refresh = create_refresh_token(sub=user_id)
+
+    return new_access, new_refresh

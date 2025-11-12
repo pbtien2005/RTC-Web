@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from typing import Literal, Optional
 from fastapi import Form
 
 class LoginInput(BaseModel):
@@ -12,14 +13,19 @@ class LoginInput(BaseModel):
         password: str=Form(...)
     ): return cls(email=email,password=password)
 
-class LoginOut(BaseModel):
-    id: int
+class UserOut(BaseModel):
+    user_id: int
     email: EmailStr
     role: str
-    avatar_url: str
+    avatar_url: Optional[str] = None
+    username: Optional[str]=None
 
     model_config = { "from_attributes": True }
 
+class LoginOut(BaseModel):
+    access_token: str
+    token_type: Literal["bearer"] = "bearer"
+    user: UserOut
 
 
 class RegisterInput(BaseModel):

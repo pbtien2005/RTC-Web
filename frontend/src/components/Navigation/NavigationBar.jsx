@@ -28,11 +28,10 @@ export const NavigationBar = () => {
       icon: BellRing,
       label: "Notifications",
       badge: notificationCount,
-      path: "/",
+      path: "/notification",
     },
   ];
   const user = JSON.parse(localStorage.getItem("user"));
-  console.log(user.avatar_url);
 
   return (
     <div className="fixed inset-y-0 w-20 bg-gradient-to-b from-[#E90000] to-[#FAA6FF] border-r border-[#ff1a1a] flex flex-col items-center py-6 space-y-6 transition-all duration-300 hover:w-21">
@@ -51,11 +50,16 @@ export const NavigationBar = () => {
                 setActiveNav(item.id);
                 navigate(item.path);
               }}
-              className={`relative p-3 rounded-xl transition-all flex items-center gap-3 group-hover:w-full ${
+              className={`relative p-3 rounded-xl transition-all
+              flex items-center justify-center           /* center mặc định */
+              group-hover:justify-start group-hover:w-full
+              gap-0 group-hover:gap-3                    /* không gap khi ẩn label */
+              ${
                 isActive
                   ? "bg-white/25 text-white backdrop-blur-sm scale-105"
                   : "text-white/80 hover:text-white hover:bg-white/15 hover:scale-105"
-              } ${isLogo ? "mb-4" : ""}`}
+              }
+              ${isLogo ? "mb-4" : ""}`}
               title={item.label}
             >
               <Icon className={`w-6 h-6 ${isLogo ? "w-7 h-7" : ""} shrink-0`} />

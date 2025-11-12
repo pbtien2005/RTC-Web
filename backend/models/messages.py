@@ -29,7 +29,7 @@ class Message(Base):
 
     edited_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now(),default=datetime.now())
 
     __table_args__ = (
         # Option: cấm cả edited_at & deleted_at cùng lúc? (tuỳ nghiệp vụ)

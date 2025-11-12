@@ -22,6 +22,7 @@ class User(Base):
 
     user_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
+    username: Mapped[str]=mapped_column(String(255),nullable=True,default="none")
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(Text, nullable=False)
 
@@ -80,6 +81,16 @@ class User(Base):
 
     states: Mapped[List["ConversationState"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
+    )
+    message_requests_sent: Mapped[list["MessageRequest"]] = relationship(
+        back_populates="requester",
+        foreign_keys="MessageRequest.requester_id"
+    )
+
+    # Người nhận yêu cầu
+    message_requests_received: Mapped[list["MessageRequest"]] = relationship(
+        back_populates="target",
+        foreign_keys="MessageRequest.target_id"
     )
 
     def __repr__(self) -> str:
