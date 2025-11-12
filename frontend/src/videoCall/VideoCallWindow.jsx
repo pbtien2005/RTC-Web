@@ -41,7 +41,10 @@ export const VideoCallWindow = () => {
     }
   }, [remoteStreamRef.current]);
 
-  if (!callState.isInCall) return null;
+  if (!callState.isInCall) {
+    console.log("đã chạy dòng này");
+    return null;
+  }
 
   // Minimized view
   if (callState.isMinimized) {
@@ -115,7 +118,7 @@ export const VideoCallWindow = () => {
           {/* Caller info */}
           <div className="absolute top-4 left-4 bg-black bg-opacity-50 rounded-lg px-4 py-2">
             <p className="text-white text-lg font-medium">
-              {callState.callerInfo?.name || "Unknown"}
+              {callState.callerInfo?.username || "Unknown"}
             </p>
             <p className="text-gray-300 text-sm">In call...</p>
           </div>

@@ -31,10 +31,10 @@ export async function handleIncoming(rawString) {
   if (obj.type == "call.request") {
     console.log(obj);
     ui.setIncomingCall({
-      callerInfo: {
+      calleeInfo: {
         id: obj.sender_id,
-        name: obj.data.sender_name,
-        avatar: obj.data.sender_avatar,
+        username: obj.data.sender_name,
+        avatar_url: obj.data.sender_avatar,
       },
       conversationId: obj.data.conversation_id,
     });

@@ -16,7 +16,7 @@ import {
   setIceHandler,
   onRemoteTrack,
   closePeer,
-} from "./peerConnection";
+} from "./peerConnection.js";
 import { registerUI } from "../ws/dispatcher.js";
 
 const VideoCallContext = createContext();
@@ -114,11 +114,11 @@ export const VideoCallProvider = ({ children }) => {
     if (!incomingCall) return false;
 
     try {
-      console.log("🟢 Accepting call from:", incomingCall.callerInfo.username);
-      const { callerInfo, conversationId } = incomingCall;
+      const { calleeInfo, conversationId } = incomingCall;
+      console.log("🟢 Accepting call from:", incomingCall.calleeInfo.username);
       const raw = localStorage.getItem("user");
       const user = JSON.parse(raw);
-      const calleeInfo = {
+      const callerInfo = {
         id: user.user_id,
         username: user.username,
         avatar_url: user.avatar_url,
@@ -126,12 +126,12 @@ export const VideoCallProvider = ({ children }) => {
 
       // Set trạng thái đang chờ
       setCallState({
-        isInCall: false,
+        isInCall: true,
         isMinimized: false,
         isMuted: false,
         isVideoOff: false,
-        callerInfo,
-        calleeInfo,
+        callerInfo: calleeInfo,
+        calleeInfo: calleeInfo,
         conversationId,
         callStatus: "connecting",
         hasRemoteStream: false,
@@ -141,7 +141,7 @@ export const VideoCallProvider = ({ children }) => {
       sendWS({
         type: "call.accept",
         sender_id: getCurrentUserId(),
-        receiver_id: callerInfo.id,
+        receiver_id: calleeInfo.id,
       });
 
       setIncomingCall(null);
@@ -157,54 +157,57 @@ export const VideoCallProvider = ({ children }) => {
 
   // 🔵 BƯỚC 3: Caller nhận được accept, bắt đầu init peer và tạo offer
   const handleCallAccepted = async () => {
-    if (!pendingCallRef.current) {
-      console.error("❌ No pending call to accept");
-      return;
-    }
+    try {
+      if (!pendingCallRef.current) {
+        console.error("❌ No pending call to accept");
+        return;
+      }
 
-    const { conversationId, callerInfo, calleeInfo } = pendingCallRef.current;
+      const { conversationId, callerInfo, calleeInfo } = pendingCallRef.current;
 
-    console.log("✅ Call accepted, initializing peer connection...");
+      console.log("✅ Call accepted, initializing peer connection...");
 
-    setCallState((prev) => ({
-      ...prev,
-      isInCall: true,
-      callStatus: "connecting",
-    }));
+      setCallState((prev) => ({
+        ...prev,
+        isInCall: true,
+        callStatus: "connecting",
+      }));
 
-    // 1️⃣ Tạo peer connection
-    createPeer();
+      // 1️⃣ Tạo peer connection
+      createPeer();
 
-    // 2️⃣ Setup ICE handler
-    setIceHandler((candidate) => {
-      if (!candidate) return;
-      console.log("🧊 Sending ICE candidate");
+      // 2️⃣ Setup ICE handler
+      setIceHandler((candidate) => {
+        if (!candidate) return;
+        console.log("🧊 Sending ICE candidate");
+        sendWS({
+          type: "call.ice",
+          sender_id: callerInfo.id,
+          receiver_id: calleeInfo.id,
+          data: candidate,
+        });
+      });
+
+      // 3️⃣ Lấy local stream
+      const localStream = await getLocalStream();
+      localStreamRef.current = localStream || null;
+      attachLocalTracks(localStream);
+
+      // 4️⃣ Tạo offer
+      const offer = await makeOffer();
+
       sendWS({
-        type: "call.ice",
+        type: "call.offer",
         sender_id: callerInfo.id,
         receiver_id: calleeInfo.id,
-        data: candidate,
+        data: offer,
       });
-    });
 
-    // 3️⃣ Lấy local stream
-    const localStream = await getLocalStream();
-    localStreamRef.current = localStream;
-    attachLocalTracks(localStream);
-
-    // 4️⃣ Tạo offer
-    const offer = await makeOffer();
-
-    // 5️⃣ Gửi offer qua WebSocket
-    sendWS({
-      type: "call.offer",
-      sender_id: callerInfo.id,
-      receiver_id: calleeInfo.id,
-      data: offer,
-    });
-
-    console.log("📤 Offer sent");
-    pendingCallRef.current = null;
+      console.log("📤 Offer sent");
+      pendingCallRef.current = null;
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   // 🟢 BƯỚC 4: Callee nhận offer, init peer và tạo answer
@@ -226,15 +229,15 @@ export const VideoCallProvider = ({ children }) => {
       console.log("🧊 Sending ICE candidate");
       sendWS({
         type: "call.ice",
-        sender_id: callState.calleeInfo.id,
-        receiver_id: callState.callerInfo.id,
+        sender_id: callState.callerInfo.id,
+        receiver_id: callState.calleeInfo.id,
         data: candidate,
       });
     });
 
     // 3️⃣ Lấy local stream
     const localStream = await getLocalStream();
-    localStreamRef.current = localStream;
+    localStreamRef.current = localStream || null;
     attachLocalTracks(localStream);
 
     // 4️⃣ Apply offer và tạo answer
@@ -243,8 +246,8 @@ export const VideoCallProvider = ({ children }) => {
     // 5️⃣ Gửi answer qua WebSocket
     sendWS({
       type: "call.answer",
-      sender_id: callState.calleeInfo.id,
-      receiver_id: callState.callerInfo.id,
+      sender_id: callState.callerInfo.id,
+      receiver_id: callState.calleeInfo.id,
       data: answer,
     });
 
@@ -258,7 +261,7 @@ export const VideoCallProvider = ({ children }) => {
     sendWS({
       type: "call.decline",
       sender_id: getCurrentUserId(),
-      receiver_id: incomingCall.callerInfo.id,
+      receiver_id: incomingCall.calleeInfo.id,
     });
 
     setIncomingCall(null);
@@ -294,13 +297,6 @@ export const VideoCallProvider = ({ children }) => {
   // Kết thúc cuộc gọi
   const endCall = () => {
     console.log("🔴 Ending call");
-
-    // Stop local stream
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((track) => track.stop());
-    }
-
-    // Close peer connection
     closePeer();
 
     // Gửi thông báo kết thúc
@@ -309,6 +305,7 @@ export const VideoCallProvider = ({ children }) => {
         type: "call.end",
         sender_id: getCurrentUserId(),
         receiver_id: callState.calleeInfo.id,
+        data: "",
       });
     }
 

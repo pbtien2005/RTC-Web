@@ -18,17 +18,21 @@ export async function getLocalStream() {
       const hasCamera = devices.some((d) => d.kind === "videoinput");
       const hasMic = devices.some((d) => d.kind === "audioinput");
       if (hasMic) {
-        console.log("Chỉ có micro");
-        localSTream = await navigator.mediaDevices.getUserMedia({
-          video: false,
-          audio: true,
-        });
+        try {
+          console.log("Chỉ có micro");
+          localSTream = await navigator.mediaDevices.getUserMedia({
+            video: false,
+            audio: true,
+          });
+        } catch {}
       } else if (hasCamera) {
-        console.log("Chỉ có camera");
-        localSTream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: false,
-        });
+        try {
+          console.log("Chỉ có camera");
+          localSTream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false,
+          });
+        } catch {}
       } else {
         localSTream = null;
       }

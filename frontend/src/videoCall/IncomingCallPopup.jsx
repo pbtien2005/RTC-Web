@@ -4,38 +4,14 @@ import { Phone, PhoneOff } from "lucide-react";
 
 export const IncomingCallPopup = () => {
   const { incomingCall, acceptCall, declineCall } = useVideoCall();
-  const [ringingAudio] = useState(() => {
-    const audio = new Audio("/sounds/ringtone.mp3"); // Thêm file ringtone vào public/sounds
-    audio.loop = true;
-    return audio;
-  });
-
-  // Play ringtone khi có cuộc gọi đến
-  useEffect(() => {
-    if (incomingCall) {
-      ringingAudio.play().catch((err) => {
-        console.error("Failed to play ringtone:", err);
-      });
-    } else {
-      ringingAudio.pause();
-      ringingAudio.currentTime = 0;
-    }
-
-    return () => {
-      ringingAudio.pause();
-      ringingAudio.currentTime = 0;
-    };
-  }, [incomingCall, ringingAudio]);
 
   if (!incomingCall) return null;
 
   const handleAccept = async () => {
-    ringingAudio.pause();
     await acceptCall();
   };
 
   const handleDecline = () => {
-    ringingAudio.pause();
     declineCall();
   };
 
@@ -46,15 +22,15 @@ export const IncomingCallPopup = () => {
         <div className="flex justify-center mb-6">
           <div className="relative">
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center animate-pulse">
-              {incomingCall.callerInfo.avatar ? (
+              {incomingCall.calleeInfo.avatar_url ? (
                 <img
-                  src={incomingCall.callerInfo.avatar_url}
-                  alt={incomingCall.callerInfo.name_url}
+                  src={incomingCall.calleeInfo.avatar_url}
+                  alt={incomingCall.calleeInfo.name_url}
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (
                 <span className="text-3xl font-bold text-white">
-                  {incomingCall.callerInfo.username}
+                  {incomingCall.calleeInfo.username}
                 </span>
               )}
             </div>
@@ -66,7 +42,7 @@ export const IncomingCallPopup = () => {
         {/* Caller info */}
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">
-            {incomingCall.callerInfo.username}
+            {incomingCall.calleeInfo.username}
           </h2>
           <p className="text-gray-500">Incoming video call...</p>
         </div>
