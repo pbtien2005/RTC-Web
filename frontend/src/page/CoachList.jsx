@@ -1,22 +1,28 @@
 import { useState, useEffect } from "react";
+import { apiFetch } from "../api/api";
+import { useNotification } from "../hook/useNotification";
+import NotificationToast from "../components/NotificationToast";
 
 export default function CoachList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [coachers, setCoachers] = useState([]);
+
+  const { notification, showSuccess, showError, hideNotification } =
+    useNotification();
+
   useEffect(() => {
     fetchCoaches();
   }, []);
 
-  // 2. Hàm fetchCoaches đã được sửa lại
+  // Hàm fetchCoaches đã được sửa lại
   const fetchCoaches = async () => {
     try {
       setLoading(true);
-      setError(null); // Xóa lỗi cũ (nếu có) trước khi fetch
+      setError(null);
 
       const res = await fetch("http://localhost:8000/students/list_coachers");
 
-      // Thêm kiểm tra nếu response không thành công (vd: 404, 500)
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -24,16 +30,15 @@ export default function CoachList() {
       const data = await res.json();
       setCoachers(data);
     } catch (err) {
-      // 3. Khối catch này BÂY GIỜ sẽ bắt lỗi nếu fetch thất bại
       console.error("lỗi khi fetch list coach:", err);
-      setError("Failed to load coaches"); // Set state lỗi
+      const errorMessage = "Failed to load coaches";
+      setError(errorMessage);
+      // ✅ Sửa: Truyền string trực tiếp, không dùng state error
     } finally {
-      // 4. Khối finally LUÔN LUÔN chạy, dù fetch thành công hay thất bại
       setLoading(false);
     }
   };
 
-  // Generate avatar color from email
   const getAvatarColor = (email) => {
     const colors = [
       "bg-indigo-500",
@@ -50,12 +55,10 @@ export default function CoachList() {
     return colors[index];
   };
 
-  // Get initials from email
   const getInitials = (email) => {
     return email.substring(0, 2).toUpperCase();
   };
 
-  // Handle register
   const handleRegister = async (coachId) => {
     try {
       // TODO: Call API đăng ký
@@ -67,20 +70,25 @@ export default function CoachList() {
       //   }
       // });
 
-      alert(`Đã đăng ký với coach ID: ${coachId}`);
+      // ✅ Thêm: Hiển thị thông báo thành công
       console.log("Register with coach:", coachId);
     } catch (error) {
       console.error("Register error:", error);
+      // ✅ Thêm: Hiển thị thông báo lỗi
     }
   };
 
-  // Handle message
-  const handleMessage = (coachId) => {
-    // TODO: Navigate to message page or open chat
-    // navigate(`/messages/${coachId}`);
-
-    alert(`Mở chat với coach ID: ${coachId}`);
-    console.log("Message coach:", coachId);
+  const handleMessage = async (coachId) => {
+    try {
+      const res = await apiFetch("/chat/request", {
+        method: "POST",
+        body: JSON.stringify({ target_id: coachId, intro_text: "hello" }),
+      });
+      showSuccess("Đã gửi yêu cầu thành công!");
+    } catch (err) {
+      console.log("Chat request error:", err);
+      showError(err.detail);
+    }
   };
 
   if (loading) {
@@ -122,6 +130,10 @@ export default function CoachList() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4">
       <div className="max-w-7xl mx-auto">
+        <NotificationToast
+          notification={notification}
+          onClose={hideNotification}
+        />
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
@@ -142,14 +154,12 @@ export default function CoachList() {
               {/* Avatar */}
               <div className="flex flex-col items-center mb-4">
                 {coach.avatar_url ? (
-                  // Nếu CÓ avatar_url, dùng thẻ <img>
                   <img
                     src={coach.avatar_url}
                     alt="Coach Avatar"
                     className="w-20 h-20 rounded-full object-cover shadow-lg group-hover:scale-110 transition-transform duration-300"
                   />
                 ) : (
-                  // Nếu KHÔNG CÓ avatar_url, dùng code cũ của bạn (hiển thị chữ cái)
                   <div
                     className={`w-20 h-20 rounded-full ${getAvatarColor(
                       coach.email
@@ -204,7 +214,7 @@ export default function CoachList() {
                 <div className="space-y-2 mt-4">
                   {/* Đăng ký Button */}
                   <button
-                    onClick={() => handleRegister(coach.id)}
+                    onClick={() => handleRegister(coach.user_id)}
                     className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg"
                   >
                     <svg
@@ -225,7 +235,7 @@ export default function CoachList() {
 
                   {/* Nhắn tin Button */}
                   <button
-                    onClick={() => handleMessage(coach.id)}
+                    onClick={() => handleMessage(coach.user_id)}
                     className="w-full py-2.5 px-4 rounded-xl bg-white dark:bg-gray-700 border-2 border-indigo-600 dark:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-gray-600 text-indigo-600 dark:text-indigo-400 font-semibold text-sm transition-all duration-200 flex items-center justify-center space-x-2"
                   >
                     <svg

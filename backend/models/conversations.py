@@ -48,3 +48,7 @@ class Conversation(Base):
     last_message: Mapped[Message | None] = relationship(
         foreign_keys=[last_message_id], post_update=True
     )
+    message_requests: Mapped[list["MessageRequest"]] = relationship(
+        back_populates="conversation",
+        foreign_keys="MessageRequest.related_conversation_id"
+    )

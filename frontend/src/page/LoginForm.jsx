@@ -25,6 +25,7 @@ export function LoginForm() {
       const res = await fetch("http://localhost:8000/auth/login", {
         method: "POST",
         body: data,
+        credentials: "include",
       });
       const result = await res.json();
       localStorage.setItem("access_token", result.access_token);

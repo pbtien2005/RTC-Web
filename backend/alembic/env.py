@@ -11,6 +11,7 @@ from models.conversation_state import ConversationState
 from models.conversations import Conversation
 from models.user_certificates import UserCertificate
 from models.booking_requests import BookingRequest
+from models.message_requests import MessageRequest
 
 from models.messages import Message
 # this is the Alembic Config object, which provides
