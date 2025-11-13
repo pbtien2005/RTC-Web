@@ -16,6 +16,7 @@ export default function EditProfilePage() {
     avatar_url: "",
     dob: "",
     introduction_text: "",
+    username: "",
   });
 
   // State cho danh sách bằng cấp
@@ -54,7 +55,9 @@ export default function EditProfilePage() {
           avatar_url: data.avatar_url || "",
           dob: data.dob ? data.dob.split("T")[0] : "",
           introduction_text: data.introduction_text || "",
+          username: data.username || "",
         };
+        
 
         setFormData(profileData);
         setCertificates(data.certificates || []); // <-- Giờ sẽ hoạt động
@@ -241,6 +244,19 @@ export default function EditProfilePage() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-indigo-400"
                   />
                 </div>
+                <div>
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Tên đăng nhập (Username)
+                </label>
+                <input
+                  type="text" name="username" id="username"
+                  value={formData.username || ""} onChange={handleProfileChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-indigo-400"
+                />
+               </div>
+
+
+
                 {/* Nghề nghiệp */}
                 <div>
                   <label

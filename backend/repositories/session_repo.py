@@ -21,7 +21,7 @@ class SessionRepository:
             select(Session)
             .where(
                 Session.status == SessionStatus.SCHEDULED,
-                Session.start_at > now
+                Session.start_at >= now
             )
         )
 

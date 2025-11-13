@@ -227,7 +227,12 @@ export default function MySlotsPage() {
 
         {/* === PHẦN LỊCH CỦA COACH === */}
         <div className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6">
-          {/* Header Lịch */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-1 w-12 bg-gradient-to-r from-pink-500 to-red-500 rounded-full"></div>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+              Xem và Hủy lịch trống
+            </h2>
+          </div>
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-4">
               <button

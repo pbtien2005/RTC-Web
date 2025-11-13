@@ -20,8 +20,7 @@ def create_token(data: dict, expires_delta: timedelta) -> str:
     to_encode = data.copy()
     if "sub" in to_encode:
         to_encode["sub"] = str(to_encode["sub"])
-    expire=datetime.now(timezone.utc)+expires_delta #Tinh toan thoi diem het han
-    to_encode.update({"exp":expire})
-    encode_jwt=jwt.encode(to_encode,SECRET_KEY,algorithm=ALGORITHM_TOKEN) #Tạo ra cấu trúc JWT và mã hóa chúng
+    expire = datetime.now(timezone.utc) + expires_delta
+    to_encode.update({"exp": expire})
+    encode_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM_TOKEN)
     return encode_jwt
-

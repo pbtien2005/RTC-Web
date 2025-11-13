@@ -40,7 +40,9 @@ export function LoginForm() {
       setMessage("Đăng nhập thành công cho ${result.username} ");
       if (result.user.role === "admin") {
         navigate("/admin/dashboard");
-      } else {
+      } else if(result.user.role === "coacher"){
+        navigate("/coach/home");
+      } else{
         navigate("/");
       }
       console.log(result.user);

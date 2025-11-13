@@ -34,8 +34,8 @@ export default function CoachAvailabilityPage() {
   });
   const [generateParams, setGenerateParams] = useState({
     start_date: getTodayDate(),
-    days_to_generate: 14,
-    slot_duration_minutes: 30,
+    days_to_generate: 30,
+    slot_duration_minutes: 60,
   });
 
   const [loading, setLoading] = useState(true);
@@ -149,7 +149,7 @@ export default function CoachAvailabilityPage() {
         onClose={hideNotification}
       />
       <h1 className="text-3xl font-bold mb-8">
-        Quản lý Lịch rảnh (Availability)
+        Thiết lập lịch dạy
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -158,7 +158,7 @@ export default function CoachAvailabilityPage() {
           {/* Danh sách quy tắc hiện có */}
           <div className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6">
             <h2 className="text-2xl font-semibold mb-4">
-              Quy tắc rảnh của bạn
+              Lịch trống trong tuần
             </h2>
             <div className="space-y-3">
               {rules.length > 0 ? (
@@ -190,7 +190,7 @@ export default function CoachAvailabilityPage() {
           {/* Form thêm quy tắc mới */}
           <div className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6">
             <h2 className="text-2xl font-semibold mb-4">
-              Thêm quy tắc rảnh mới
+              Thêm giờ rảnh trong tuần
             </h2>
             <form
               onSubmit={handleAddRule}
@@ -294,7 +294,7 @@ export default function CoachAvailabilityPage() {
                 htmlFor="days_to_generate"
                 className="block text-sm font-medium mb-1"
               >
-                Tạo cho bao nhiêu ngày (mặc định 14)
+                Trong vòng bao nhiêu ngày 
               </label>
               <input
                 type="number"
@@ -310,7 +310,7 @@ export default function CoachAvailabilityPage() {
                 htmlFor="slot_duration_minutes"
                 className="block text-sm font-medium mb-1"
               >
-                Độ dài 1 slot (phút, mặc định 30)
+                Độ 1 dài buổi học (phút)
               </label>
               <input
                 type="number"

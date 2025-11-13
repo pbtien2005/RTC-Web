@@ -18,6 +18,7 @@ class UserProfileOut(BaseModel):
     email: EmailStr
     full_name: Optional[str] = None
     dob: Optional[date] = None
+    username: Optional[str] = None
     avatar_url: str
     phone: Optional[str] = None
     job: Optional[str] = None
@@ -29,6 +30,7 @@ class UserProfileOut(BaseModel):
 class UserProfileUpdate(BaseModel):
         """Schema để nhận dữ liệu cập nhật profile."""
         full_name: Optional[str] = Field(None, max_length=255)
+        username: Optional[str] = Field(None, max_length=255)
         dob: Optional[date] = None
         avatar_url: Optional[str] = Field(None, max_length=2000)
         phone: Optional[str] = Field(None, max_length=32)

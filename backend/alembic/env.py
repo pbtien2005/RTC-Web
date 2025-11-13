@@ -1,19 +1,27 @@
+# alembic/env.py
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import create_engine
 from sqlalchemy import pool
-from core.config import settings
-from core.db import Base
+from core.config import settings # <-- Đảm bảo dòng này đúng
+from core.db import Base         # <-- Import Base
 from alembic import context
-from models.user import User
+
+# ✅ BƯỚC 1: IMPORT TẤT CẢ CÁC MODEL CỦA BẠN
+# Alembic cần "thấy" được tất cả các class này
+from models.user import User, Coach, Student, Admin
+from models.user_certificates import UserCertificate
 from models.conversation_state import ConversationState
 from models.conversations import Conversation
-from models.user_certificates import UserCertificate
-from models.booking_requests import BookingRequest
 from models.message_requests import MessageRequest
-
 from models.messages import Message
+from models.coacher_availability import CoacherAvailability
+from models.open_slots import OpenSlot
+from models.booking_requests import BookingRequest
+from models.booking_request_items import BookingRequestItem
+from models.session import Session
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -27,6 +35,8 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
+
+# ✅ BƯỚC 2: KÍCH HOẠT DÒNG NÀY
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -37,20 +47,12 @@ target_metadata = Base.metadata
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
-
-    This configures the context with just a URL
-    and not an Engine, though an Engine is acceptable
-    here as well.  By skipping the Engine creation
-    we don't even need a DBAPI to be available.
-
-    Calls to context.execute() here emit the given string to the
-    script output.
-
+    ... (phần này giữ nguyên) ...
     """
     url = settings.DB_URL
     context.configure(
         url=url,
-        target_metadata=target_metadata,
+        target_metadata=target_metadata, # <-- Dòng này giờ sẽ hoạt động
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
     )
@@ -61,16 +63,14 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
+    ... (phần này giữ nguyên) ...
     """
     connectable = create_engine(settings.DB_URL)
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, 
+            target_metadata=target_metadata # <-- Dòng này giờ sẽ hoạt động
         )
 
         with context.begin_transaction():

@@ -2,11 +2,11 @@ from typing import List
 from fastapi import APIRouter, FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from core.db import get_db
-from schemas.auth_schema import UserOut
+from schemas.user_schema import UserOuput
 from services.user_service import UserService
 
 router=APIRouter(prefix="/students",tags=["student"])
-@router.get("/list_coachers", response_model=List[UserOut])
+@router.get("/list_coachers", response_model=List[UserOuput])
 async def get_all_coachers(
     db: Session = Depends(get_db)
 ):

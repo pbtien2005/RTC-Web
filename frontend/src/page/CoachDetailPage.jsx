@@ -33,20 +33,7 @@ export default function CoachDetailPage() {
       try {
         setLoading(true);
         setError(null);
-        const profileRes = await apiFetch(`/coachers/${coachId}`, {
-          method: "GET",
-        });
-        if (!res.ok) {
-          let errorMsg = "Không thể tải thông tin Coacher";
-
-          try {
-            const errData = await res.json();
-            if (errData?.detail) errorMsg = errData.detail;
-          } catch (_) {}
-
-          throw new Error(errorMsg);
-        }
-
+        const profileRes = await apiFetch(`/coachers/${coachId}`);
         const profileData = await profileRes.json();
         setCoach(profileData);
       } catch (err) {
@@ -160,15 +147,13 @@ export default function CoachDetailPage() {
         notification={notification}
         onClose={hideNotification}
       />
-
-      <Link
-        to="/"
-        className="text-pink-600 dark:text-pink-400 hover:text-red-600 dark:hover:text-red-400 font-semibold mb-6 inline-flex items-center gap-2 transition-colors"
-      >
+      
+      <Link to="/" className="text-pink-600 dark:text-pink-400 hover:text-red-600 dark:hover:text-red-400 font-semibold mb-6 inline-flex items-center gap-2 transition-colors">
         <span>←</span> Quay lại danh sách
       </Link>
 
       <div className="max-w-6xl mx-auto space-y-6">
+        
         {/* === PHẦN PROFILE === */}
         <div className="bg-white dark:bg-gray-800 shadow-2xl rounded-3xl overflow-hidden">
           <div className="bg-gradient-to-r from-pink-500 via-red-500 to-pink-600 h-24"></div>
@@ -184,12 +169,8 @@ export default function CoachDetailPage() {
               </div>
               {/* Tên & Job */}
               <div className="flex-1 text-center md:text-left mt-4 md:mt-0 md:mb-2">
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
-                  {coach.full_name}
-                </h1>
-                <p className="text-lg text-gray-600 dark:text-gray-400 font-medium mt-1">
-                  {coach.job}
-                </p>
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">{coach.full_name}</h1>
+                <p className="text-lg text-gray-600 dark:text-gray-400 font-medium mt-1">{coach.job}</p>
               </div>
               {/* Nút Chat */}
               <div className="mt-6 md:mt-0 flex-shrink-0 md:mb-2">
@@ -206,77 +187,60 @@ export default function CoachDetailPage() {
 
         {/* === PHẦN GIỚI THIỆU & BẰNG CẤP (2 CỘT) === */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Cột trái: Giới thiệu */}
-          <div className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="h-1 w-12 bg-gradient-to-r from-pink-500 to-red-500 rounded-full"></div>
-              <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                Giới thiệu về Coach
-              </h2>
-            </div>
-
-            {coach.introduction_text ? (
-              <p className="whitespace-pre-wrap text-gray-700 dark:text-gray-300 leading-relaxed text-left">
-                {" "}
-                {/* ✅ THÊM: text-left */}
-                {coach.introduction_text}
-              </p>
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400 italic text-left">
-                {" "}
-                {/* ✅ THÊM: text-left */}
-                Coach chưa cập nhật nội dung giới thiệu.
-              </p>
-            )}
+          
+        {/* Cột trái: Giới thiệu */}
+        <div className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-1 w-12 bg-gradient-to-r from-pink-500 to-red-500 rounded-full"></div>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+              Giới thiệu về Coach
+            </h2>
           </div>
+          
+          {coach.introduction_text ? (
+            <p className="whitespace-pre-wrap text-gray-700 dark:text-gray-300 leading-relaxed text-left"> {/* ✅ THÊM: text-left */}
+              {coach.introduction_text}
+            </p>
+          ) : (
+            <p className="text-gray-500 dark:text-gray-400 italic text-left"> {/* ✅ THÊM: text-left */}
+              Coach chưa cập nhật nội dung giới thiệu.
+            </p>
+          )}
+        </div>
 
           {/* Cột phải: Bằng cấp */}
           <div className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="h-1 w-12 bg-gradient-to-r from-pink-500 to-red-500 rounded-full"></div>
-              <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                Bằng cấp & Chứng chỉ
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Bằng cấp & Chứng chỉ</h2>
             </div>
             {coach.certificates && coach.certificates.length > 0 ? (
               <div className="grid grid-cols-2 gap-4">
                 {coach.certificates.map((cert) => (
-                  <div
-                    key={cert.id}
-                    className="border-2 border-gray-200 dark:border-gray-700 hover:border-pink-300 dark:hover:border-pink-700 rounded-xl p-3 text-center transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1"
-                  >
-                    <img
-                      src={cert.image_url}
-                      alt={cert.title}
-                      className="w-full h-24 object-contain mb-2"
-                    />
-                    <p className="font-semibold text-xs text-gray-700 dark:text-gray-300">
-                      {cert.title}
-                    </p>
+                  <div key={cert.id} className="border-2 border-gray-200 dark:border-gray-700 hover:border-pink-300 dark:hover:border-pink-700 rounded-xl p-3 text-center transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1">
+                    <img src={cert.image_url} alt={cert.title} className="w-full h-24 object-contain mb-2"/>
+                    <p className="font-semibold text-xs text-gray-700 dark:text-gray-300">{cert.title}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 dark:text-gray-400 italic">
-                Coacher chưa cập nhật bằng cấp.
-              </p>
+              <p className="text-gray-500 dark:text-gray-400 italic">Coacher chưa cập nhật bằng cấp.</p>
             )}
           </div>
-        </div>
+
+        
+      </div>
         {/* === PHẦN LỊCH RẢNH === */}
         <WeeklySlotPicker
           coachId={coachId}
           selectedSlots={selectedSlots}
           onSlotSelect={handleSlotSelect}
         />
-
+        
         {/* === PHẦN LỜI NHẮN BOOKING === */}
         {selectedSlots.length > 0 && (
           <div className="bg-gradient-to-br from-pink-50 to-red-50 dark:from-gray-800 dark:to-gray-700 shadow-lg rounded-2xl p-8 border-2 border-pink-200 dark:border-pink-900">
-            <label
-              htmlFor="bookingMessage"
-              className="block text-lg font-bold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2"
-            >
+            <label htmlFor="bookingMessage" className="block text-lg font-bold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
               <span className="text-pink-600">✉</span> Gửi lời nhắn (Tùy chọn)
             </label>
             <textarea
@@ -289,7 +253,7 @@ export default function CoachDetailPage() {
             ></textarea>
           </div>
         )}
-
+        
         {/* === NÚT ĐẶT LỊCH === */}
         {selectedSlots.length > 0 && (
           <div className="flex justify-center">
@@ -320,25 +284,22 @@ export default function CoachDetailPage() {
           <div className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 w-full max-w-lg">
             {/* Gradient header */}
             <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-pink-500 via-red-500 to-pink-600 rounded-t-3xl"></div>
-
+            
             {/* Nút đóng modal */}
-            <button
+            <button 
               onClick={() => setIsChatModalOpen(false)}
               className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors hover:rotate-90 transform duration-300"
             >
               <X size={28} />
             </button>
-
+            
             <h2 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100 mt-2">
               Gửi lời nhắn
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Cho{" "}
-              <span className="text-pink-600 dark:text-pink-400 font-semibold">
-                {coach.full_name}
-              </span>
+              Cho <span className="text-pink-600 dark:text-pink-400 font-semibold">{coach.full_name}</span>
             </p>
-
+            
             <form onSubmit={handleMessage}>
               <textarea
                 rows="5"
@@ -360,10 +321,8 @@ export default function CoachDetailPage() {
                   disabled={isSendingChat}
                   className="py-3 px-8 rounded-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold disabled:from-gray-400 disabled:to-gray-500 flex items-center gap-2 shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
                 >
-                  {isSendingChat && (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  )}
-                  {isSendingChat ? "Đang gửi..." : "Gửi ngay"}
+                  {isSendingChat && <Loader2 className="w-5 h-5 animate-spin" />}
+                  {isSendingChat ? 'Đang gửi...' : 'Gửi ngay'}
                 </button>
               </div>
             </form>

@@ -2,7 +2,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from typing import List
-from datetime import datetime, date, time, timedelta
+from datetime import datetime, date, time, timedelta, timezone
 
 from repositories.availability_repo import AvailabilityRepository
 from models.open_slots import OpenSlot, OpenSlotStatus
