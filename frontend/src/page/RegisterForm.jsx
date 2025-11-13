@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { apiFetch } from "../api/api";
 
 export function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -25,7 +26,7 @@ export function RegisterForm() {
     data.append("email", formData.email);
     data.append("password", formData.password);
     try {
-      const res = await fetch("http://localhost:8000/auth/register", {
+      const res = await apiFetch("http://localhost:8000/auth/register", {
         method: "POST",
         body: data,
       });

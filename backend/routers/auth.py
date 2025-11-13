@@ -3,7 +3,8 @@ from sqlalchemy.orm import Session
 from schemas.auth_schema import RegisterInput,RegisterOutput
 from core.db import get_db
 from core.config import REFRESH_TOKEN_EXPIRE_DAYS
-from services.auth_service import AuthService,rotate_refresh_and_issue_access
+from services.auth_service import AuthService
+from services.auth_service import rotate_refresh_and_issue_access
 from fastapi import Form
 from schemas.auth_schema import LoginInput,LoginOut
 

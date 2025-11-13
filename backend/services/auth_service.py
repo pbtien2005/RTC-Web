@@ -4,7 +4,7 @@ from repositories.user_repo import UserRepository
 from schemas.auth_schema import RegisterInput
 from fastapi import HTTPException, status
 from core.security import hash_password,verify_password,create_token
-from models.user import User, Student, UserRole 
+from models.user import User, Student, UserRole ,Coach
 from schemas.auth_schema import LoginInput
 from core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
 
@@ -27,6 +27,11 @@ class AuthService:
             email=payload.email,
             password_hash=hashed,
         )
+        if user_obj.role == UserRole.COACHER:
+            user.coach = Coach(student_number=0)
+        elif user_obj.role == UserRole.STUDENT:
+            user.student = Student(goal="...", slot_quota=0, slot_used=0)
+
         
         if user_obj.role == UserRole.STUDENT.value:
             new_student_details = Student(

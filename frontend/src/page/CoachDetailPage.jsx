@@ -33,7 +33,20 @@ export default function CoachDetailPage() {
       try {
         setLoading(true);
         setError(null);
-        const profileRes = await apiFetch(`/coachers/${coachId}`);
+        const profileRes = await apiFetch(`/coachers/${coachId}`, {
+          method: "GET",
+        });
+        if (!res.ok) {
+          let errorMsg = "Không thể tải thông tin Coacher";
+
+          try {
+            const errData = await res.json();
+            if (errData?.detail) errorMsg = errData.detail;
+          } catch (_) {}
+
+          throw new Error(errorMsg);
+        }
+
         const profileData = await profileRes.json();
         setCoach(profileData);
       } catch (err) {
