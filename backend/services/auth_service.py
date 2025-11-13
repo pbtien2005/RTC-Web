@@ -6,23 +6,24 @@ from fastapi import HTTPException, status
 from core.security import hash_password,verify_password,create_token
 from models.user import User, Student, UserRole 
 from schemas.auth_schema import LoginInput
-from core.config import ACCESS_TOKEN_EXPIRE_MINUTES,REFRESH_TOKEN_EXPIRE_DAYS
+from core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
+
 
 class AuthService:
 
-    def __init__(self,db):
-        self.repo=UserRepository(db)
+    def __init__(self, db):
+        self.repo = UserRepository(db)
 
     def create_user(self, payload: RegisterInput):
-        existing=self.repo.get_by_email(payload.email)
+        existing = self.repo.get_by_email(payload.email)
         if existing:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already exists",
             )
-        hashed=hash_password(payload.password)
+        hashed = hash_password(payload.password)
 
-        user_obj=User(
+        user_obj = User(
             email=payload.email,
             password_hash=hashed,
         )
@@ -36,9 +37,9 @@ class AuthService:
 
         user=self.repo.create_user(user_obj)
         return user
-    
+
     def login(self, payload: LoginInput):
-        user=self.repo.get_by_email(payload.email)
+        user = self.repo.get_by_email(payload.email)
         if user is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, 

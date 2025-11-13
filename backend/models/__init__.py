@@ -3,3 +3,8 @@ from .conversations import Conversation
 from .messages import Message
 from .user import User
 from .user_certificates import UserCertificate
+from .coacher_availability import CoacherAvailability
+from .open_slots import OpenSlot
+from .booking_requests import BookingRequest
+from .booking_request_items import BookingRequestItem
+from .session import Session

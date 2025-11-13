@@ -2,16 +2,18 @@ from pydantic import BaseModel, EmailStr
 from typing import Literal, Optional
 from fastapi import Form
 
+
 class LoginInput(BaseModel):
     email: EmailStr
     password: str
 
     @classmethod
     def as_form(
-        cls,
-        email: EmailStr=Form(...),
-        password: str=Form(...)
-    ): return cls(email=email,password=password)
+            cls,
+            email: EmailStr = Form(...),
+            password: str = Form(...)
+    ): return cls(email=email, password=password)
+
 
 class UserOut(BaseModel):
     user_id: int
@@ -26,6 +28,7 @@ class LoginOut(BaseModel):
     access_token: str
     token_type: Literal["bearer"] = "bearer"
     user: UserOut
+    model_config = {"from_attributes": True}
 
 
 class RegisterInput(BaseModel):
@@ -34,14 +37,14 @@ class RegisterInput(BaseModel):
 
     @classmethod
     def as_form(
-        cls,
-        email: EmailStr=Form(...),
-        password: str=Form(...)
-    ): return cls(email=email,password=password)
+            cls,
+            email: EmailStr = Form(...),
+            password: str = Form(...)
+    ): return cls(email=email, password=password)
 
 
 class RegisterOutput(BaseModel):
     user_id: int
     email: EmailStr
-    
-    model_config = { "from_attributes": True }
+
+    model_config = {"from_attributes": True}

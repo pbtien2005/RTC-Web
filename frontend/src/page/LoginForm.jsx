@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { NavigationBar } from "../components/Navigation/NavigationBar";
 import { useNavigate } from "react-router-dom";
+import { NavigationBar } from "../components/Navigation/NavigationBar";
+
 export function LoginForm() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({

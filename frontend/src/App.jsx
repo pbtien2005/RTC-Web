@@ -3,6 +3,15 @@ import { RegisterForm } from "./page/RegisterForm";
 import { LoginForm } from "./page/LoginForm";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import CoachList from "./page/CoachList";
+import CoachDetailPage from "./page/CoachDetailPage";
+import EditProfilePage from "./page/EditProfilePage";
+import CoachAvailabilityPage from "./page/CoachAvailabilityPage";
+import CoachDashboard from "./page/CoachDashboard";
+import CoachHome from "./page/CoachHome";
+import MySchedulePage from "./page/MySchedulePage";
+import MySlotsPage from "./page/MySlotsPage";
+import MySentRequestsPage from "./page/MySentRequestsPage";
+
 import AppLayout from "./AppLayout";
 import { Message } from "./page/Message";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -13,7 +22,6 @@ import StudentListPage from "./components/admin/StudentListPage";
 import CoacherListPage from "./components/admin/CoacherListPage";
 import AdminProtectedRoute from "./components/admin/AdminProtectedRoute";
 
-import NotificationsPage from "./page/NotificationsPage";
 import WebSocketProvider from "./ws/WebSocketProvider";
 import { VideoCallProvider } from "./videoCall/VideoCallContext";
 import { ws } from "./ws/socket";
@@ -39,9 +47,22 @@ function App() {
             </ProtectedRoute>
           }
         >
+          {/* ✅ THÊM TRANG CHỦ MỚI VÀO ĐÂY */}
+          <Route path="/coach/home" element={<CoachHome />} />
+
+          {/* (Các route cũ của bạn) */}
+          <Route path="/coach/dashboard" element={<CoachDashboard />} />
+          <Route
+            path="/coach/availability"
+            element={<CoachAvailabilityPage />}
+          />
+          <Route path="/my-schedule" element={<MySchedulePage />} />
+          <Route path="/profile/edit" element={<EditProfilePage />} />
+          <Route path="/coach/my-slots" element={<MySlotsPage />} />
           <Route path="/" element={<CoachList />} />
           <Route path="/message" element={<Message />} />
-          <Route path="/notification" element={<NotificationsPage />} />
+          <Route path="/requests/sent" element={<MySentRequestsPage />} />
+          <Route path="/coacher/:coachId" element={<CoachDetailPage />} />
         </Route>
 
         <Route
@@ -63,5 +84,4 @@ function App() {
     </BrowserRouter>
   );
 }
-
 export default App;
