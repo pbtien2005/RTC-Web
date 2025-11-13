@@ -44,6 +44,7 @@ class User(Base):
     avatar_url: Mapped[str ] = mapped_column(String(2000),default="https://kenh14cdn.com/203336854389633024/2025/9/29/55608936113720574976099734364295725483729360n-1759142829408-17591428300561251128220.jpg")
     phone: Mapped[str | None] = mapped_column(String(32))
     job: Mapped[str | None] = mapped_column(String(255))
+    introduction_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     # các field tuỳ sơ đồ của bạn (site, city, etc.)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
@@ -104,8 +105,8 @@ class Coach(Base):
         ForeignKey("users.user_id", ondelete="CASCADE"), primary_key=True
     )
     student_number: Mapped[int | None] = mapped_column(Integer)
-
     user: Mapped[User] = relationship(back_populates="coach")
+    availabilities = relationship("CoacherAvailability", back_populates="coacher")
 
 
 class Student(Base):
