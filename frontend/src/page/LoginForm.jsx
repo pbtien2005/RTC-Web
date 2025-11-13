@@ -27,6 +27,11 @@ export function LoginForm() {
         body: data,
         credentials: "include",
       });
+      if (!res.ok) {
+        const errText = await res.text(); // đọc nội dung lỗi
+        alert(`Đăng nhập thất bại: ${errText || res.statusText}`);
+        return; // dừng ở đây
+      }
       const result = await res.json();
       localStorage.setItem("access_token", result.access_token);
       localStorage.setItem("user", JSON.stringify(result.user));

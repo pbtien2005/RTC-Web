@@ -18,12 +18,14 @@ export const ChatHeader = ({
           </button>
         )}
         <img
-          src={conversation.avatar}
-          alt={conversation.name}
+          src={conversation.avatar_url}
+          alt={conversation.username}
           className="w-10 h-10 rounded-full"
         />
         <div className="ml-3">
-          <h2 className="font-semibold text-gray-900">{conversation.name}</h2>
+          <h2 className="font-semibold text-gray-900">
+            {conversation.username}
+          </h2>
           <p
             className={`text-xs ${
               conversation.online ? "text-green-500" : "text-red-500"
@@ -35,12 +37,6 @@ export const ChatHeader = ({
       </div>
 
       <div className="flex items-center space-x-3">
-        <button
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          onClick={onCall}
-        >
-          <Phone className="w-5 h-5 text-gray-600" />
-        </button>
         <button
           className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           onClick={onVideoCall}

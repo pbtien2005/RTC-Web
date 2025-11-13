@@ -175,8 +175,8 @@ export function Message() {
             conversationsMapping[receiverId] = {
               id: conv.id,
               receiver_id: receiverId,
-              name: conv.participant.name,
-              avatar:
+              username: conv.participant.name,
+              avatar_url:
                 conv.participant.avatar ||
                 `https://api.dicebear.com/7.x/avataaars/svg?seed=${conv.participant.name}`,
               lastMessage: conv.lastMessage?.content || "No messages yet",

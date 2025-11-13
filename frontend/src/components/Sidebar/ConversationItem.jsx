@@ -20,9 +20,9 @@ export const ConversationItem = ({ conversation, isSelected, onClick }) => {
       <div className="ml-3 flex-1 min-w-0">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-gray-900 truncate">
-            {conversation.name}
+            {conversation.username}
           </h3>
-          <span className="text-xs text-gray-500">{conversation.time}</span>
+          {/* <span className="text-xs text-gray-500">{conversation.time}</span> */}
         </div>
         <div className="flex items-center justify-between mt-1">
           <p className="text-sm text-gray-600 truncate">
