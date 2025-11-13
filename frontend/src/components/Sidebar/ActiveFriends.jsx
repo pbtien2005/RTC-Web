@@ -38,7 +38,7 @@ export const ActiveFriends = ({ conversations }) => {
               <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
             </div>
             <span className="text-xs text-gray-600 mt-1 truncate w-14 text-center">
-              {friend.name.split(" ")[0]}
+              {friend.username.split(" ")[0]}
             </span>
           </div>
         ))}
