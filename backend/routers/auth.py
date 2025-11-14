@@ -5,7 +5,7 @@ from core.db import get_db
 from core.config import REFRESH_TOKEN_EXPIRE_DAYS
 from services.auth_service import AuthService
 from fastapi import Form
-from schemas.auth_schema import LoginInput
+from schemas.auth_schema import LoginInput,LoginOut
 from auth.dependencies import rotate_refresh_and_issue_access
 
 
@@ -17,7 +17,7 @@ def create_user(payload: RegisterInput = Depends(RegisterInput.as_form),db: Sess
     user=service.create_user(payload)
     return user
 
-@router.post("/login")
+@router.post("/login",response_model=LoginOut)
 def login(response: Response, payload: LoginInput=Depends(LoginInput.as_form), db: Session=Depends(get_db)):
     service=AuthService(db)
     token=service.login(payload=payload)

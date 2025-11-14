@@ -29,7 +29,7 @@ import { IncomingCallPopup } from "./videoCall/IncomingCallPopup";
 import { RingingScreen } from "./videoCall/RingingScreen";
 import { VideoCallWindow } from "./videoCall/VideoCallWindow";
 function App() {
-  const wsUrl = `ws://192.168.4.102:8000/ws`;
+  const wsUrl = `ws://172.20.10.4:8000/ws`;
   return (
     <BrowserRouter>
       <Routes>

@@ -71,19 +71,6 @@ export function createPeer() {
     console.log("làldsfasd");
     const state = pc.connectionState;
     console.log("[Peer] connectionState:", pc.connectionState);
-    switch (state) {
-      case "connected":
-        setCallState("connected");
-        break;
-      case "disconnected":
-        setCallSate("ended");
-        break;
-      case "failed":
-        setCallState("ended");
-        break;
-      case "closed":
-        break;
-    }
   };
 }
 export function setIceHandler(fn) {

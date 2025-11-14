@@ -14,7 +14,7 @@ export default function CoachList() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch("http://localhost:8000/students/list_coachers");
+      const res = await fetch("http://172.20.10.4:8000/students/list_coachers");
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -55,7 +55,10 @@ export default function CoachList() {
         <div className="text-center">
           <div className="relative inline-block">
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 blur-xl opacity-50 animate-pulse"></div>
-            <div className="relative inline-block animate-spin rounded-full h-16 w-16 border-4 border-transparent bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-border" style={{ borderTopColor: 'transparent' }}></div>
+            <div
+              className="relative inline-block animate-spin rounded-full h-16 w-16 border-4 border-transparent bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-border"
+              style={{ borderTopColor: "transparent" }}
+            ></div>
           </div>
           <p className="mt-6 text-lg font-semibold bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
             Loading coaches...
@@ -84,7 +87,9 @@ export default function CoachList() {
               />
             </svg>
           </div>
-          <p className="text-xl font-semibold text-red-600 dark:text-red-400">{error}</p>
+          <p className="text-xl font-semibold text-red-600 dark:text-red-400">
+            {error}
+          </p>
         </div>
       </div>
     );
@@ -118,7 +123,7 @@ export default function CoachList() {
               <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl hover:shadow-2xl border border-white/20 dark:border-gray-700/50 transition-all duration-500 hover:-translate-y-2 cursor-pointer overflow-hidden">
                 {/* Gradient overlay hiệu ứng */}
                 <div className="absolute inset-0 bg-gradient-to-br from-pink-500/0 via-purple-500/0 to-blue-500/0 group-hover:from-pink-500/10 group-hover:via-purple-500/10 group-hover:to-blue-500/10 transition-all duration-500 rounded-3xl"></div>
-                
+
                 {/* Content */}
                 <div className="relative z-10">
                   {/* Avatar với ring gradient */}

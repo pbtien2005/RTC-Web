@@ -111,7 +111,10 @@ export const VideoCallProvider = ({ children }) => {
 
   // 🟢 BƯỚC 2: Callee nhận được request và accept
   const acceptCall = async () => {
-    if (!incomingCall) return false;
+    if (!incomingCall) {
+      console.log("alo");
+      return false;
+    }
 
     try {
       const { calleeInfo, conversationId } = incomingCall;
@@ -123,6 +126,7 @@ export const VideoCallProvider = ({ children }) => {
         username: user.username,
         avatar_url: user.avatar_url,
       };
+      console.log(callerInfo);
 
       // Set trạng thái đang chờ
       setCallState({
@@ -297,7 +301,7 @@ export const VideoCallProvider = ({ children }) => {
   // Kết thúc cuộc gọi
   const endCall = () => {
     console.log("🔴 Ending call");
-    closePeer();
+    // closePeer();
 
     // Gửi thông báo kết thúc
     if (callState.conversationId && callState.calleeInfo) {

@@ -17,31 +17,12 @@ let ui = {
   pendingCallRef: "",
 };
 
-let messageQueue = [];
-let isUIReady = false;
-
 export function registerUI(api) {
   Object.keys(api).forEach((key) => {
     ui[key] = api[key];
   });
-
-  isUIReady = true;
-
-  // Xử lý các messages trong queue
-  if (messageQueue.length > 0) {
-    console.log(`📦 Processing ${messageQueue.length} queued messages`);
-    messageQueue.forEach((queuedMessage) => {
-      handleIncoming(queuedMessage);
-    });
-    messageQueue = [];
-  }
 }
 export async function handleIncoming(rawString) {
-  if (!isUIReady) {
-    console.log("⏳ UI not ready, queueing message");
-    messageQueue.push(rawString);
-    return;
-  }
   let obj;
   obj = tryParseJSON(rawString);
 
@@ -50,29 +31,6 @@ export async function handleIncoming(rawString) {
     ui.userStatusUpdate(obj.sender_id, true);
     console.log(typeof obj.sender_id);
   }
-  // if (obj.type == "user.online_list") {
-  //   // const ids = obj.data.map(String);
-
-  //   // for (const uidStr of ids) {
-  //   //   console.log("Updating status for user:", uidStr);
-  //   //   console.log("Calling ui.userStatusUpdate with:", uidStr, true);
-
-  //   //   try {
-  //   //     const result = ui.userStatusUpdate(uidStr, true);
-  //   //     console.log("Result:", result);
-  //   //   } catch (e) {
-  //   //     console.error("Error calling userStatusUpdate:", e);
-  //   //   }
-  //   // }
-  //   try {
-  //     const res = await apiFetch("/conversation/user-online", {
-  //       method: "GET",
-  //     });
-  //     const data = res.json();
-  //     console.log(data);
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
 
   if (obj.type == "user.offline") {
     console.log("đã nhận user.offline");
