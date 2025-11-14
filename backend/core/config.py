@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 settings = Settings()
 
 
-SECRET_KEY="your-very-strong-32-byte-random-secret-key"
+SECRET_KEY="f82a9c5b7e1d44dfbfa8c4d39e51a67cbd43e9f2107bd9d2c8b6a4f7d12c3e9f"
 
 ALGORITHM_TOKEN = "HS256"
 

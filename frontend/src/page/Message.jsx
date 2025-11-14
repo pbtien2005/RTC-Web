@@ -184,8 +184,30 @@ export function Message() {
               online: conv.participant.isOnline,
             };
           });
-
           setConversationsMap(conversationsMapping);
+          try {
+            const res = await apiFetch("/conversation/user-online", {
+              method: "GET",
+            });
+            const data = await res.json();
+            console.log("đã nhận response online list:", data);
+            setConversationsMap((prev) => {
+              const next = { ...prev }; // clone để React nhận ref mới
+
+              data.forEach((u) => {
+                if (next[u]) {
+                  // clone từng conversation để tránh mutate sâu
+                  next[u] = {
+                    ...next[u],
+                    online: true,
+                  };
+                }
+              });
+              return next;
+            });
+          } catch (e) {
+            console.error(e);
+          }
 
           // Auto select first conversation
           const firstReceiverId = Object.keys(conversationsMapping)[0];
@@ -342,6 +364,10 @@ export function Message() {
   const onVideoCall = async () => {
     if (selectedChat !== null) {
       const conversation = conversationsMap[selectedChat];
+      if (conversation.online == false) {
+        alert("Người dùng không online ");
+        return;
+      }
       const raw = localStorage.getItem("user");
       const user = raw ? JSON.parse(raw) : null;
 
@@ -351,12 +377,12 @@ export function Message() {
         username: user.username,
         avatar_url: user.avatar_url,
       };
+      console.log(callerInfo);
       const calleeInfo = {
         id: conversation.receiver_id,
-        username: conversation.name,
-        avatar_url: conversation.avatar,
+        username: conversation.username,
+        avatar_url: conversation.avatar_url,
       };
-      console.log(callerInfo);
       console.log(calleeInfo);
 
       const success = await requestCall(

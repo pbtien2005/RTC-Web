@@ -1,3 +1,4 @@
+import { getCurrentUserId } from "../../hook/GetCurrentUserId";
 export const ActiveFriends = ({ conversations }) => {
   const activeFriends = conversations.filter((c) => c.online);
 

@@ -9,6 +9,7 @@ import {
 } from "react";
 import { connectWS, sendWS } from "./socket.js"; // <-- dùng util của bạn
 import { handleIncoming } from "./dispatcher.js";
+import { useVideoCall } from "../videoCall/VideoCallContext.jsx";
 
 export const WebSocketContext = createContext(null);
 export const useWS = () => useContext(WebSocketContext);
@@ -16,6 +17,7 @@ export const useWS = () => useContext(WebSocketContext);
 export default function WebSocketProvider({ wsUrl, children }) {
   const wsRef = useRef(null);
   const [readyState, setReadyState] = useState(WebSocket.CLOSED);
+
   // 2) Kết nối khi mount/đổi wsUrl, dọn dẹp khi unmount
   useEffect(() => {
     if (!wsUrl) return;
@@ -31,6 +33,7 @@ export default function WebSocketProvider({ wsUrl, children }) {
     };
     const onClose = () => {
       syncState();
+
       console.log("❌ WS close");
     };
     const onError = () => {

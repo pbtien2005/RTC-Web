@@ -82,3 +82,8 @@ async def send_message(
         await wsManager.send_1_to_1(data)
         return res
 
+@router.get("/user-online") 
+def list_user_online(   current_user:User=Depends(get_current_user)):
+     list_online =wsManager.list_online_user(current_user.user_id)
+     print("list user đã online trước đó",list_online)
+     return list_online

@@ -15,16 +15,11 @@ class ConnectionManager:
             "sender_id": id_client,
         }
         await self.broadcast(payload1)
-
-        others_online = [uid for uid in self.active_connections.keys() if uid != id_client]
-        payload2 = {
-            "type": "user.online_list",
-            "data": others_online
-        }
-        await self.send_personal_message(payload2,websocket)
    
-    def list_active_user(self):
-        return self.active_connections.keys()
+    def list_online_user(self,id_client):
+        others_online = [uid for uid in self.active_connections.keys() if uid != id_client]
+        print(others_online)
+        return others_online
 
     
     async def disconnect(self,id_client: str):

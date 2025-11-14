@@ -70,3 +70,28 @@ def decode_token(token: str) -> dict:
     except JWTError as e:
         raise ValueError("invalid_token") from e
     
+
+async def rotate_refresh_and_issue_access(refresh_token: str):
+    if not refresh_token:
+        raise HTTPException(status_code=401, detail="Missing refresh token")
+
+    # 1) Giải mã & kiểm tra loại
+    try:
+        payload = decode_token(refresh_token)
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    if payload.get("type") != "refresh":
+        raise HTTPException(status_code=401, detail="Wrong token type")
+
+    user_id = payload.get("sub")
+    if not user_id :
+        raise HTTPException(status_code=401, detail="Invalid token payload")
+
+
+    new_access = create_access_token(sub=user_id)
+
+    # 4) Xoay vòng refresh (khuyến nghị)
+    new_refresh = create_refresh_token(sub=user_id)
+
+    return new_access, new_refresh

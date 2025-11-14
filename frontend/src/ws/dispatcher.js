@@ -5,6 +5,7 @@ import {
   createPeer,
 } from "../videoCall/peerConnection.js";
 import { tryParseJSON } from "./utils.js";
+import { apiFetch } from "../api/api.js";
 let ui = {
   addMessage: () => {},
   userStatusUpdate: () => {},
@@ -15,19 +16,16 @@ let ui = {
   endCall: () => {},
   pendingCallRef: "",
 };
+
 let messageQueue = [];
 let isUIReady = false;
 
 export function registerUI(api) {
-  console.log("🔧 Registering UI handlers");
-
   Object.keys(api).forEach((key) => {
     ui[key] = api[key];
-    console.log(`✅ Registered ui.${key}`);
   });
 
   isUIReady = true;
-  console.log("🔧 Final ui:", Object.keys(ui));
 
   // Xử lý các messages trong queue
   if (messageQueue.length > 0) {
@@ -52,24 +50,29 @@ export async function handleIncoming(rawString) {
     ui.userStatusUpdate(obj.sender_id, true);
     console.log(typeof obj.sender_id);
   }
-  if (obj.type == "user.online_list") {
-    const ids = obj.data.map(String);
-    console.log("Received online users:", ids);
-    console.log("typeof ui.userStatusUpdate =", typeof ui?.userStatusUpdate);
-    console.log("Function content:", ui.userStatusUpdate.toString());
-    // Check ui và userStatusUpdate có tồn tại không
-    for (const uidStr of ids) {
-      console.log("Updating status for user:", uidStr);
-      console.log("Calling ui.userStatusUpdate with:", uidStr, true);
+  // if (obj.type == "user.online_list") {
+  //   // const ids = obj.data.map(String);
 
-      try {
-        const result = ui.userStatusUpdate(uidStr, true);
-        console.log("Result:", result);
-      } catch (e) {
-        console.error("Error calling userStatusUpdate:", e);
-      }
-    }
-  }
+  //   // for (const uidStr of ids) {
+  //   //   console.log("Updating status for user:", uidStr);
+  //   //   console.log("Calling ui.userStatusUpdate with:", uidStr, true);
+
+  //   //   try {
+  //   //     const result = ui.userStatusUpdate(uidStr, true);
+  //   //     console.log("Result:", result);
+  //   //   } catch (e) {
+  //   //     console.error("Error calling userStatusUpdate:", e);
+  //   //   }
+  //   // }
+  //   try {
+  //     const res = await apiFetch("/conversation/user-online", {
+  //       method: "GET",
+  //     });
+  //     const data = res.json();
+  //     console.log(data);
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
 
   if (obj.type == "user.offline") {
     console.log("đã nhận user.offline");
