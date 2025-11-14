@@ -23,7 +23,7 @@ export function LoginForm() {
     data.append("email", formData.email);
     data.append("password", formData.password);
     try {
-      const res = await fetch("http://localhost:8000/auth/login", {
+      const res = await fetch("http://172.20.10.4:8000/auth/login", {
         method: "POST",
         body: data,
         credentials: "include",
@@ -40,9 +40,9 @@ export function LoginForm() {
       setMessage("Đăng nhập thành công cho ${result.username} ");
       if (result.user.role === "admin") {
         navigate("/admin/dashboard");
-      } else if(result.user.role === "coacher"){
+      } else if (result.user.role === "coacher") {
         navigate("/coach/home");
-      } else{
+      } else {
         navigate("/");
       }
       console.log(result.user);
